@@ -1,0 +1,23 @@
+<h1>Edit Row</h1>
+
+<table>
+    <tr>
+    	<th>Id</th>
+        <th>First Name</th>
+        <th>Last Name</th>
+    </tr>
+</table>
+<form action="" method="post">
+{% csrf_token %}
+{% for user in users %}
+	<input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ user.id }}" />
+	<label for="choice{{ forloop.counter }}">{{ user.id }} {{ user.first_name }} {{ user.last_name }}</label><br />
+{% endfor %}
+
+<!-- Delete button -->
+<input type="submit" name="delete" value="Delete Row" />
+
+<!-- Update Button -->
+<input type="submit" name="update" value="Update Row">
+
+</form>

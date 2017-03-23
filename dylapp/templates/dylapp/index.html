@@ -1,0 +1,26 @@
+<h1>Users Table</h1>
+
+<table>
+    <tr>
+    	<th>Id</th>
+        <th>First Name</th>
+        <th>Last Name</th>
+    </tr>
+    {% for item in list_of_people %}
+    <tr>
+    	<td>{{ item.id }}</td>
+        <td>{{ item.first_name }}</td>
+        <td>{{ item.last_name }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<!-- Insert Button -->
+<form action="/dylapp/insert" method="get">
+<input type="submit" value="Insert Row">
+</form>
+
+<!-- Delete Button -->
+<form action="/dylapp/delete" method="get">
+<input type="submit" value="Edit Row">
+</form>
