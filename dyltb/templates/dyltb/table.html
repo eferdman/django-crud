@@ -7,6 +7,7 @@
 
 <body>
 <h1>Create Table Entries</h1>
+<br>
 <form class="form-inline" action="" method="post">
     {% csrf_token %}
 
@@ -21,25 +22,23 @@
     </div>
     
 </form>
-
+<br>
 <table class="table table-bordered"> 
     <tr>
+        <th>id</th>
     {% for column in columns %}
     	<th>{{ column.column_name }}</th>
     {% endfor %}
     </tr>
+
+    {% for row in columns.rows %}
     <tr>
-    	<td>hi</td>
-    	<td>hi</td>
-    <tr>
+        {% for entry in row %}
+        <td>{{ entry }}</td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
 </table>
 
-<!-- 
-    {% for column in columns %}
-    <tr>
-    	<td>{{ column.column_name }}</td>
-        <td>{{ column.column_type }}</td>
-        <td>{{ column.column_sequence }}</td>
-    </tr>
-    {% endfor %} -->
+
 </body>

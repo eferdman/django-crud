@@ -6,8 +6,8 @@ from .models import UserTables, Columns
 from django.urls import reverse
 from .models import UserTables, Columns
 
-from sqlalchemy import Table, Column, Integer, Unicode, MetaData, create_engine
-from sqlalchemy.orm import mapper, create_session
+from sqlalchemy import select, Table, Column, Integer, Unicode, MetaData, create_engine
+from sqlalchemy.orm import mapper, create_session, Session
 
 # Create your views here.
 def index(request):
@@ -51,11 +51,20 @@ def create_table(request, table_id):
     table_name = UserTables.objects.filter(pk=table_id).values()[0]['table_name']
     print("Table Name is: " + table_name)
     
-    #TODO: Insert rows into table 
     if request.method == 'POST':
-        q = session.query(table_name)
-        print(q)
-        #ins = q.insert().values(*("'{}'=request.POST.get('{}', '')".format(name) for name in column_names)
+        # insert new row into user-defined table
+        engine = create_engine('postgresql://liz:welcometodyl@localhost:5432/dyldb')
+        metadata = MetaData(bind=engine)
+        session = create_session(bind=engine, autocommit=False)
+        table = Table(table_name, metadata, autoload=True)
+        table_values = {}
+        for name in column_names:
+            table_values[name] = request.POST.get(name)
+        ins = table.insert().values(table_values)
+        conn = engine.connect()
+        result = conn.execute(ins)
+        
+        return HttpResponseRedirect('/dyltb/table/' + table_id)
     else:
         class Dtable():
             pass
@@ -78,7 +87,13 @@ def create_table(request, table_id):
         mapper(Dtable, t)
         session = create_session(bind=engine, autocommit=False)
 
-        context = {'columns': columns}
+        table = metadata.tables[table_name]
+        select_st = select([table])
+        conn = engine.connect()
+        res = conn.execute(select_st)
+
+        columns.rows = res
+        context = { 'columns': columns }
 
         #create a context
         return render(request, 'dyltb/table.html', context)
