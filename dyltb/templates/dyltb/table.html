@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+</head>
+
+<body>
+<h1>Create Table Entries</h1>
+<form class="form-inline" action="" method="post">
+    {% csrf_token %}
+
+    {% for name in columns.column_names %}
+    <div class="form-group">
+        <input type="text" class="form-control" placeholder="{{ name }}" name="{{ name }}" />
+    </div>
+    {% endfor %}
+    
+    <div class="form-group">
+        <input type="submit" name="add_row" class="btn btn-primary" value="Add an Entry">
+    </div>
+    
+</form>
+
+<table class="table table-bordered"> 
+    <tr>
+    {% for column in columns %}
+    	<th>{{ column.column_name }}</th>
+    {% endfor %}
+    </tr>
+    <tr>
+    	<td>hi</td>
+    	<td>hi</td>
+    <tr>
+</table>
+
+<!-- 
+    {% for column in columns %}
+    <tr>
+    	<td>{{ column.column_name }}</td>
+        <td>{{ column.column_type }}</td>
+        <td>{{ column.column_sequence }}</td>
+    </tr>
+    {% endfor %} -->
+</body>

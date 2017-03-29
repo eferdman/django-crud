@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+</head>
+<body>
+<h1>List Columns</h1>
+
+<form class="form-inline" action="" method="post">
+	{% csrf_token %}
+    <div class="form-group">
+        <input type="text" class="form-control" placeholder="Column Name" name="column_name" />
+    </div>
+	
+	<div class="form-group">
+        <input type="text" class="form-control" placeholder="Column Type" name="column_type" />
+    </div>
+
+	<div class="form-group">
+        <input type="text" class="form-control" placeholder="Column Sequence" name="column_sequence" />
+    </div>
+	
+	<div class="form-group">
+        <input type="submit" name="add_column" class="btn btn-primary" value="Add a Column">
+    </div>
+
+    <div class="form-group">
+        <a href="/dyltb/table/{{ columns.table_id}}">Create Table</a>
+    </div>
+    
+</form>
+<br>
+
+<table class="table table-bordered">
+    <tr>
+    	<th>Column Name</th>
+        <th>Column Type</th>
+        <th>Column Sequence</th>
+    </tr>
+    {% for column in columns %}
+    <tr>
+    	<td>{{ column.column_name }}</td>
+        <td>{{ column.column_type }}</td>
+        <td>{{ column.column_sequence }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+</body>
+</html>
