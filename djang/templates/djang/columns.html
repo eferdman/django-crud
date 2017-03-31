@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>List Columns</h1>
+
+<form class="form-inline" action="" method="post">
+	{% csrf_token %}
+    <div class="form-group">
+        <input type="text" class="form-control" placeholder="Column Name" name="name" />
+    </div>
+	
+	<div class="form-group">
+        <input type="text" class="form-control" placeholder="Column Type" name="type" />
+    </div>
+
+	<div class="form-group">
+        <input type="text" class="form-control" placeholder="Column Sequence" name="sequence" />
+    </div>
+	
+	<div class="form-group">
+        <input type="submit" name="add_column" class="btn btn-primary" value="Add a Column">
+    </div>
+
+    <div class="form-group">
+        <a href="/dyltb/table/{{ columns.table_id}}">Create Table</a>
+    </div>
+    
+</form>
+<br>
+
+<table class="table table-bordered">
+    <tr>
+    	<th>Column Name</th>
+        <th>Column Type</th>
+        <th>Column Sequence</th>
+    </tr>
+    {% for column in columns %}
+    <tr>
+    	<td>{{ column.name }}</td>
+        <td>{{ column.type }}</td>
+        <td>{{ column.sequence }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

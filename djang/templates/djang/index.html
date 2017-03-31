@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>User Tables</h1>
+
+<form action="" class="form-inline" method="post">
+	{% csrf_token %}
+	<div class="form-group">
+        <input type="text" class="form-control" placeholder="User Name" name="user_name" />
+    </div>
+	<div class="form-group">
+        <input type="text" class="form-control" placeholder="Table Name" name="table_name" class="" />
+    </div>
+	
+	<div class="form-group">
+        <input type="submit" class="btn btn-primary" value="Insert Row">
+    </div>
+</form>
+<br>
+<table class="table table-bordered">
+    <tr>
+    	<th>Id</th>
+        <th>User Name</th>
+        <th>Table Name</th>
+    </tr>
+    {% for user in users %}
+    <tr>
+    	<td>{{ user.id }}</td>
+        <td>{{ user.name }}</td>
+        <td><a href="/djang/columns/{{ user.id }}/">{{ user.table_name }}</a></td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}
