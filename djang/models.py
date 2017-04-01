@@ -1,6 +1,6 @@
 from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 
 Base = declarative_base()
 
@@ -9,7 +9,6 @@ class Users(Base):
 	id = Column(Integer, primary_key=True)
 	name = Column(String)
 	table_name = Column(String)
-	columns = relationship("Columns", backref="user")
 
 	def __init__(self, name, table_name):
 		self.name = name
@@ -25,6 +24,8 @@ class Columns(Base):
 	name = Column(String)
 	type = Column(String)
 	sequence = Column(Integer)
+
+	user = relationship('Users', backref=backref('cars', lazy='dynamic'))
 	
 	def __init__(self, table_id, name, type, sequence):
 		self.table_id = table_id

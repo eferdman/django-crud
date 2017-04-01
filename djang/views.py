@@ -1,31 +1,10 @@
-from django.shortcuts import render, render_to_response
+from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect
 import sqlalchemy, sqlalchemy.orm
+from sqlalchemy import select, Table, Column, Integer, String, Unicode, MetaData, create_engine
 from sqlalchemy.orm import sessionmaker
 from djang.models import Base, Users, Columns
-
-engine = sqlalchemy.create_engine('postgresql://liz:welcometodyl@localhost:5432/dyldb')
-Session = sessionmaker(bind=engine)
-session = Session()
-Base.metadata.create_all(engine)
-
-def is_empty(table):
-	return len(session.query(table).all()) == 0
- 
-def populate(data):
-	session.add_all(data)
-	session.commit()
-
-def insert(row):
-	session.add(row)
-	session.commit()
-
-def delete(row):
-	session.delete(row)
-	session.commit()
-
-def get_row(table, id):
-	return session.query(table).filter_by(id=id).first()
+from .helpers import *
 
 def index(request):
 	if request.method == 'POST':
@@ -41,19 +20,63 @@ def index(request):
 		context = {'users': users}
 		return render(request, 'djang/index.html', context)
 
+def generate_table(table_id, columns):
+	class Dtable():
+		pass
+
+	table_name = 'table_{}'.format(table_id)
+
+	t = Table(table_name, metadata,
+		Column('id', Integer, primary_key=True),
+		*(Column(col.name, String) for col in columns) )
+	metadata.create_all()
+	mapper(Dtable, t)
+
 def edit_columns(request, table_id):
+	columns = session.query(Columns).filter_by(table_id=table_id)
 	if request.method == 'POST':
-		name = request.POST.get('name', '')
-		type = request.POST.get('type', '')
-		sequence = request.POST.get('sequence', '')
-		
-		# can we use relationship to create a new column instead of explicitly using table_id?
-		# user = session.query(Users).filter_by(id=table_id).one()
-		
-		new_column = Columns(table_id=table_id, name=name, type=type, sequence=sequence)
-		insert(new_column)
-		return HttpResponseRedirect('djang/columns/' + table_id)
+		if request.POST.get("add_column"):
+			name = request.POST.get('name', '')
+			type = request.POST.get('type', '')
+			sequence = request.POST.get('sequence', '')
+			
+			new_column = Columns(table_id=table_id, name=name, type=type, sequence=sequence)
+			insert(new_column)
+
+			return redirect('/djang/columns/{}'.format(table_id))
+		elif request.POST.get("create_table"):
+			generate_table(table_id, columns)
+			return HttpResponseRedirect('/djang/table/{}'.format(table_id))
 	else:
-		columns = session.query(Columns).all()
 		context = {'columns': columns}
 		return render(request, 'djang/columns.html', context)
+
+def table_view(request, table_id):
+	columns = session.query(Columns).filter_by(table_id=table_id)
+	table_name = 'table_{}'.format(table_id)
+	table = Table(table_name, metadata, autoload=True)
+	table_values = {}
+	if request.method == 'POST':
+		# insert new rows into user defined table
+		for column in columns:
+			table_values[column.name] = request.POST.get(column.name)
+
+		ins = table.insert().values(table_values)
+		conn = engine.connect()
+		result = conn.execute(ins)
+
+		return redirect('/djang/table/{}'.format(table_id))
+	else:
+		# postgres bug
+		#rows = session.query(table_name).all()
+
+		# long way to query the user generated table
+		table = metadata.tables[table_name]
+		select_st = select([table])
+		conn = engine.connect()
+		res = conn.execute(select_st)
+		columns.rows = res
+
+		context = { 'columns' : columns }
+		return render(request, 'djang/table.html', context)
+
