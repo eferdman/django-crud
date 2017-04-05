@@ -1,10 +1,11 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect
 import sqlalchemy, sqlalchemy.orm
-from sqlalchemy import select, Table, Column, Integer, String, Unicode, MetaData, create_engine
+from sqlalchemy import inspect, select, Table, Column, Integer, String, Unicode, MetaData, create_engine
 from sqlalchemy.orm import sessionmaker
 from djang.models import Base, Users, Columns
 from .helpers import *
+import migrate.changeset
 
 def index(request):
 	if request.method == 'POST':
@@ -12,27 +13,31 @@ def index(request):
 		table_name = request.POST.get('table_name', '')
 		new_user = Users(name=user, table_name=table_name)
 		insert(new_user)
+
+		# dynamically create the table one time
+		generate_table(new_user.id)
+
 		return HttpResponseRedirect('/djang')
 	else:
-		if is_empty(Users):
-			populate([Users('Liz', 'Languages')])
 		users = session.query(Users).all()
 		context = {'users': users}
 		return render(request, 'djang/index.html', context)
 
-def generate_table(table_id, columns):
+def generate_table(table_id):
 	class Dtable():
 		pass
 
 	table_name = 'table_{}'.format(table_id)
 
-	t = Table(table_name, metadata,
-		Column('id', Integer, primary_key=True),
-		*(Column(col.name, String) for col in columns) )
+	# create table with only id column
+	t = Table(table_name, metadata, 
+		Column('id', Integer, primary_key=True))
+		#*(Column(col.name, String) for col in columns), extend_existing=True, autoload=True)
 	metadata.create_all()
 	mapper(Dtable, t)
 
 def edit_columns(request, table_id):
+	table_name = 'table_{}'.format(table_id)
 	columns = session.query(Columns).filter_by(table_id=table_id)
 	if request.method == 'POST':
 		if request.POST.get("add_column"):
@@ -40,13 +45,28 @@ def edit_columns(request, table_id):
 			type = request.POST.get('type', '')
 			sequence = request.POST.get('sequence', '')
 			
+			# insert a row into the Columns table
+			# TODO: check for duplicates
 			new_column = Columns(table_id=table_id, name=name, type=type, sequence=sequence)
 			insert(new_column)
 
+			# add column to dynamically generated table
+			add_column(table_name, name)
+
 			return redirect('/djang/columns/{}'.format(table_id))
-		elif request.POST.get("create_table"):
-			generate_table(table_id, columns)
-			return HttpResponseRedirect('/djang/table/{}'.format(table_id))
+		elif request.POST.get("delete_column"):
+			name = request.POST.get('col_to_delete', '')
+			
+			# delete row from Columns table
+			old_column = session.query(Columns).filter_by(name=name).filter_by(table_id=table_id).one()
+			delete(old_column)
+			
+			# delete corresponding column from dynamically generated table
+			delete_column(table_name, name)
+			
+			return redirect('/djang/columns/{}'.format(table_id))
+		elif request.POST.get("view_table"):
+			return HttpResponseRedirect('/djang/table/{}'.format(table_id))			
 	else:
 		context = {'columns': columns}
 		return render(request, 'djang/columns.html', context)
@@ -58,25 +78,51 @@ def table_view(request, table_id):
 	table_values = {}
 	if request.method == 'POST':
 		# insert new rows into user defined table
-		for column in columns:
-			table_values[column.name] = request.POST.get(column.name)
+		# based on the rows in columns table
+		if request.POST.get("add_row"):
+			for column in columns:
+				table_values[column.name] = request.POST.get(column.name)
+			print("Table Values: {}".format(table_values))
+			ins = table.insert().values(table_values)
+			conn = engine.connect()
+			result = conn.execute(ins)
 
-		ins = table.insert().values(table_values)
-		conn = engine.connect()
-		result = conn.execute(ins)
-
-		return redirect('/djang/table/{}'.format(table_id))
+			return redirect('/djang/table/{}'.format(table_id))
+		elif request.POST.get("add_column"):
+			print("before add_column")
+			add_column(table_name, "new column")
+			print("before redirect")
+			return HttpResponseRedirect('/djang/table/{}'.format(table_id))
+		elif request.POST.get("delete_column"):
+			delete_column(table_name, "new column2")
+			return HttpResponseRedirect('/djang/table/{}'.format(table_id))
 	else:
 		# postgres bug
-		#rows = session.query(table_name).all()
+		# rows = session.query(table_name).all()
+		table = {}
 
-		# long way to query the user generated table
-		table = metadata.tables[table_name]
-		select_st = select([table])
+		inspector = inspect(engine)
+		table['columns'] = [c['name'] for c in inspector.get_columns(table_name)]
+
+		# long way to query rows from the user generated table
+		user_table = metadata.tables[table_name]
+		select_st = select([user_table])
 		conn = engine.connect()
 		res = conn.execute(select_st)
-		columns.rows = res
+		table['rows'] = res
 
-		context = { 'columns' : columns }
+		# load the view by querying the user gen table
+		context = { 'table' : table }
 		return render(request, 'djang/table.html', context)
 
+# Add a column to the dynamically generated table
+def add_column(table_name, column_name):
+	table = Table(table_name, metadata)
+	col = sqlalchemy.Column(column_name, String, default="default")
+	col.create(table, populate_default=True)
+
+# Delete a column from the dynamically generated table
+def delete_column(table_name, column_name):
+	table = Table(table_name, metadata)
+	col = sqlalchemy.Column(column_name, String)
+	col.drop(table)

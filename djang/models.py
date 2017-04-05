@@ -35,4 +35,3 @@ class Columns(Base):
 
 	def __repr__(self):
 		return "<Columns {} {} {} {}>".format(self.name, self.table_id, self.type, self.sequence)
-

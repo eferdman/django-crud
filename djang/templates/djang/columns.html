@@ -19,11 +19,20 @@
 	<div class="form-group">
         <input type="submit" name="add_column" class="btn btn-primary" value="Add a Column">
     </div>
-
+    
     <div class="form-group">
-        <input type="submit" name="create_table" class="btn btn-primary" value="Create Table">
+        <input type="submit" name="view_table" class="btn btn-primary" value="View Table">
     </div>
     
+    <br><br>
+
+    <div class="form-group">
+        <input type="text" class="form-control" placeholder="Column Name to Delete" name="col_to_delete" />
+    </div>
+
+    <div class="form-group">
+        <input type="submit" name="delete_column" class="btn btn-primary" value="Delete Column">
+    </div>
 </form>
 <br>
 <h4>{{ columns.all.0.user.table_name }}</h4>

@@ -5,28 +5,26 @@
 <form class="form-inline" action="" method="post">
     {% csrf_token %}
 
-    {% for column in columns %}
+    {% for column in table.columns %}
     <div class="form-group">
-        <input type="text" class="form-control" placeholder="{{ column.name }}" name="{{ column.name }}" />
+        <input type="text" class="form-control" placeholder="{{ column }}" name="{{ column }}" />
     </div>
     {% endfor %}
     
     <div class="form-group">
         <input type="submit" name="add_row" class="btn btn-primary" value="Add an Entry">
     </div>
-    
 </form>
 
-<h4>{{ columns.all.0.user.table_name }}</h6>
+<!-- <h4>{{ columns.all.0.user.table_name }}</h6> -->
 <table class="table table-bordered"> 
     <tr>
-        <th>id</th>
-    {% for column in columns %}
-    	<th>{{ column.name }}</th>
+    {% for column in table.columns %}
+    	<th>{{ column }}</th>
     {% endfor %}
     </tr>
 
-    {% for row in columns.rows %}
+    {% for row in table.rows %}
     <tr>
         {% for entry in row %}
         <td>{{ entry }}</td>
