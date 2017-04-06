@@ -31,7 +31,7 @@ def generate_table(table_id):
 
 	# create table with only id column
 	t = Table(table_name, metadata, 
-		Column('id', Integer, primary_key=True))
+		Column('id', Integer, primary_key=True, autoload=True))
 		#*(Column(col.name, String) for col in columns), extend_existing=True, autoload=True)
 	metadata.create_all()
 	mapper(Dtable, t)
@@ -39,6 +39,9 @@ def generate_table(table_id):
 def edit_columns(request, table_id):
 	table_name = 'table_{}'.format(table_id)
 	columns = session.query(Columns).filter_by(table_id=table_id)
+	print("edit_columns -- Rows in Columns:")
+	for col in columns:
+		print(col)
 	if request.method == 'POST':
 		if request.POST.get("add_column"):
 			name = request.POST.get('name', '')
@@ -68,11 +71,16 @@ def edit_columns(request, table_id):
 		elif request.POST.get("view_table"):
 			return HttpResponseRedirect('/djang/table/{}'.format(table_id))			
 	else:
+		# recreate columns object?
 		context = {'columns': columns}
 		return render(request, 'djang/columns.html', context)
 
 def table_view(request, table_id):
+	print("inside table view")
 	columns = session.query(Columns).filter_by(table_id=table_id)
+	print("table_view -- Rows in Columns:")
+	for col in columns:
+		print(col)
 	table_name = 'table_{}'.format(table_id)
 	table = Table(table_name, metadata, autoload=True)
 	table_values = {}
@@ -88,29 +96,26 @@ def table_view(request, table_id):
 			result = conn.execute(ins)
 
 			return redirect('/djang/table/{}'.format(table_id))
-		elif request.POST.get("add_column"):
-			print("before add_column")
-			add_column(table_name, "new column")
-			print("before redirect")
-			return HttpResponseRedirect('/djang/table/{}'.format(table_id))
-		elif request.POST.get("delete_column"):
-			delete_column(table_name, "new column2")
-			return HttpResponseRedirect('/djang/table/{}'.format(table_id))
 	else:
 		# postgres bug
 		# rows = session.query(table_name).all()
 		table = {}
 
 		inspector = inspect(engine)
+		test = [c for c in inspector.get_columns(table_name)]
+		print("Inspector Columns:")
+		print(test)
 		table['columns'] = [c['name'] for c in inspector.get_columns(table_name)]
-
+		
 		# long way to query rows from the user generated table
-		user_table = metadata.tables[table_name]
+		# metadata.reflect(bind=engine, extend_existing=True)
+		#user_table = metadata.tables[table_name]
+		user_table = Table(table_name, metadata, autoload=True)
 		select_st = select([user_table])
 		conn = engine.connect()
 		res = conn.execute(select_st)
 		table['rows'] = res
-
+		conn.close()
 		# load the view by querying the user gen table
 		context = { 'table' : table }
 		return render(request, 'djang/table.html', context)

@@ -2,7 +2,7 @@ import sqlalchemy
 from sqlalchemy.orm import sessionmaker, mapper, Session
 from djang.models import Base
 
-engine = sqlalchemy.create_engine('postgresql://liz:welcometodyl@localhost:5432/dyldb')
+engine = sqlalchemy.create_engine('postgresql+psycopg2://liz:welcometodyl@localhost:5432/dyldb')
 Session = sessionmaker(bind=engine)
 session = Session()
 Base.metadata.create_all(engine)
@@ -25,3 +25,6 @@ def delete(row):
 
 def get_row(table, id):
 	return session.query(table).filter_by(id=id).first()
+
+def get_rows(table, id):
+	return session.query(table).filter_by(id=id)
