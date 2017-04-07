@@ -15,16 +15,20 @@ def populate(data):
 	session.add_all(data)
 	session.commit()
 
+
 def insert(row):
 	session.add(row)
 	session.commit()
+
 
 def delete(row):
 	session.delete(row)
 	session.commit()
 
-def get_row(table, id):
+
+def get_row_by_id(table, id):
 	return session.query(table).filter_by(id=id).first()
 
-def get_rows(table, id):
+
+def get_rows_by_id(table, id):
 	return session.query(table).filter_by(id=id)
