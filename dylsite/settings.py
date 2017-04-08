@@ -27,10 +27,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1','localhost']
 
-
 # Application definition
 
 INSTALLED_APPS = [
+    'insignia.apps.InsigniaConfig',
     'dylapp.apps.DylappConfig',
     'dyltb.apps.DyltbConfig',
     'djang.apps.DjangConfig',

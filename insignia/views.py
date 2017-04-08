@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect
 import sqlalchemy.orm
 from sqlalchemy import inspect, select, Table, Column, Integer, String, Unicode, MetaData, create_engine
-from jinja.models import Base, Users, Columns
+from insignia.models import Base, Users, Columns
 from .helpers import *
 import migrate.changeset
 
@@ -17,11 +17,11 @@ def index(request):
         # dynamically create the table one time
         generate_table(new_user.id)
 
-        return HttpResponseRedirect('/jinja')
+        return HttpResponseRedirect('/insignia')
     else:
         users = session.query(Users).all()
         context = {'users': users}
-        return render(request, 'jinja/table-list.html', context)
+        return render(request, 'insignia/table-list_interactions.html', context)
 
 
 def edit_columns(request, table_id):
