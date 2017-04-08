@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Column View</h1>
+
+<form class="form-inline" action="" method="post">
+	{% csrf_token %}
+    <div class="form-group">
+        <input type="text" class="form-control" placeholder="Column Name" name="name" />
+    </div>
+	
+	<div class="form-group">
+        <input type="text" class="form-control" placeholder="Column Type" name="type" />
+    </div>
+
+	<div class="form-group">
+        <input type="text" class="form-control" placeholder="Column Sequence" name="sequence" />
+    </div>
+	
+	<div class="form-group">
+        <input type="submit" name="add_column" class="btn btn-primary" value="Add a Column">
+    </div>
+    
+    <div class="form-group">
+        <input type="submit" name="view_table" class="btn btn-primary" value="View Table">
+    </div>
+    
+    <br><br>
+
+    <div class="form-group">
+        <input type="text" class="form-control" placeholder="Column Name to Delete" name="col_to_delete" />
+    </div>
+
+    <div class="form-group">
+        <input type="submit" name="delete_column" class="btn btn-primary" value="Delete Column">
+    </div>
+</form>
+<br>
+<h4>{{ columns.all.0.user.table_name }}</h4>
+<table class="table table-bordered">
+    <tr>
+    	<th>Column Name</th>
+        <th>Column Type</th>
+        <th>Column Sequence</th>
+    </tr>
+    {% for column in columns %}
+    <tr>
+    	<td>{{ column.name }}</td>
+        <td>{{ column.type }}</td>
+        <td>{{ column.sequence }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}
