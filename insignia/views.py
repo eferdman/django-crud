@@ -9,7 +9,7 @@ import migrate.changeset
 
 def index(request):
     if request.method == 'POST':
-        user = request.POST.get('user_name', '')
+        user = "DefaultUser"
         table_name = request.POST.get('table_name', '')
         new_user = Users(name=user, table_name=table_name)
         insert(new_user)
@@ -19,9 +19,16 @@ def index(request):
 
         return HttpResponseRedirect('/insignia')
     else:
-        users = session.query(Users).all()
-        context = {'users': users}
-        return render(request, 'insignia/table-list_interactions.html', context)
+        if request.GET.get("edit_columns"):
+            id = request.GET.get('id', '')
+            return HttpResponseRedirect('/insignia/columns/{}'.format(id))
+        elif request.GET.get("edit_data"):
+            id = request.GET.get('id', '')
+            return HttpResponseRedirect('/insignia/table/{}'.format(id))
+        else:
+            users = session.query(Users).all()
+            context = {'users': users}
+            return render(request, 'insignia/index.html', context)
 
 
 def edit_columns(request, table_id):
@@ -33,8 +40,8 @@ def edit_columns(request, table_id):
     if request.method == 'POST':
         if request.POST.get("add_column"):
             name = request.POST.get('name', '')
-            type = request.POST.get('type', '')
-            sequence = request.POST.get('sequence', '')
+            type = "String"
+            sequence = "5"
 
             # check if that column already exists:
             inspector = inspect(engine)
@@ -46,23 +53,23 @@ def edit_columns(request, table_id):
 
                 # add column to dynamically generated table
                 add_column(table_name, name)
-            return redirect('/djang/columns/{}'.format(table_id))
+            return redirect('/insignia/columns/{}'.format(table_id))
         elif request.POST.get("delete_column"):
-            name = request.POST.get('col_to_delete', '')
+            id = request.POST.get('column_id', '')
 
             # delete row from Columns table
-            old_column = session.query(Columns).filter_by(name=name).filter_by(table_id=table_id).one()
+            old_column = session.query(Columns).filter_by(id=id).one()
             delete(old_column)
 
             # delete corresponding column from dynamically generated table
-            delete_column(table_name, name)
+            delete_column(table_name, old_column.name)
 
-            return redirect('/djang/columns/{}'.format(table_id))
+            return redirect('/insignia/columns/{}'.format(table_id))
         elif request.POST.get("view_table"):
-            return HttpResponseRedirect('/djang/table/{}'.format(table_id))
+            return HttpResponseRedirect('/insignia/table/{}'.format(table_id))
     else:
         context = {'columns': columns}
-        return render(request, 'djang/columns.html', context)
+        return render(request, 'insignia/edit-columns_interactions.html', context)
 
 
 def table_view(request, table_id):
@@ -96,6 +103,7 @@ def table_view(request, table_id):
             return redirect('/djang/table/{}'.format(table_id))
     else:
         table = {}
+        table['name'] = session.query(Users).filter_by(id=table_id).one().table_name
 
         inspector = inspect(engine)
         table_columns = [c for c in inspector.get_columns(table_name)]
@@ -107,7 +115,7 @@ def table_view(request, table_id):
         table['rows'] = session.query(user_table).all()
 
         context = {'table': table}
-        return render(request, 'djang/table.html', context)
+        return render(request, 'insignia/table-edit.html', context)
 
 
 # long way to query rows from the dynamically generated table

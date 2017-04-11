@@ -1,25 +1,5 @@
-<!DOCTYPE html>
-<html>
-
-<head>
-
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>DTables</title>
-
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link href="font-awesome/css/font-awesome.css" rel="stylesheet">
-
-    <link href="css/plugins/dataTables/datatables.min.css" rel="stylesheet">
-
-    <link href="css/animate.css" rel="stylesheet">
-    <link href="css/style.css" rel="stylesheet">
-    
-    <link href="css/main.css" rel="stylesheet">
-
-</head>
-
+{% extends 'base.html' %}
+{% block content %}
 <body>
 
     <div id="wrapper">
@@ -47,40 +27,27 @@
         <div class="wrapper wrapper-content animated fadeInRight">
             <div class="col-lg-12">
                 <div class="ibox float-e-margins">
-					<h1>[Table Name] Columns</h1>
+					<h4>{{ columns.all.0.user.table_name }}</h4>
                     <h2>Update Table Columns</h2>
                 </div>
             </div>
-            
-        
 			 
                 <div class="col-lg-12">
                     <div class="ibox float-e-margins">
                         <div class="ibox-title">
                             <h5>Column List</h5>
-                            <div class="ibox-tools">
-                                <a class="collapse-link">
-                                    <i class="fa fa-chevron-up"></i>
-                                </a>
-                                <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                                    <i class="fa fa-wrench"></i>
-                                </a>
-                                <a class="close-link">
-                                    <i class="fa fa-times"></i>
-                                </a>
-                            </div>
                         </div>
-                        <div class="ibox-content">
+                         <div class="ibox-content">
                             <form role="form" class="form-inline">
-	                            <button type="button" class="btn btn-w-m btn-success" style="margin-bottom: 0;">Add Column</button>
-                                
+	                            <button type="button" id="create_button" class="btn btn-w-m btn-success" style="margin-bottom: 0;">Add Column</button>
                             </form>
                         </div>
                         
-                        <div class="ibox-content col-lg-12">
-	                        <h5>On Click Step 1 of 2</h5>
+                        <div id="popout_form" class="ibox-content col-lg-12">
 	                        <div class="well col-lg-3">
-                            	<form role="form" class="form-inline">
+                            	<form role="form" method="post" class="form-inline">
+                                    	{% csrf_token %}
+
 	                            	<table class="table" style="">
 		                            	<thead>
 			                            	<tr>
@@ -91,16 +58,15 @@
 		                            	<tbody>
 			                            	<tr>
 			                            		<td style="vertical-align: middle;"><label class="col-lg-2 control-label">Name</label></td>
-												<td><input type="text" placeholder="Name" class="form-control"></td>
+												<td><input type="text" name="name" placeholder="Name" class="form-control"></td>
 			                            	</tr>
 			                            	<tr>
 			                            		<td style="vertical-align: middle;"><label class="col-lg-2 control-label">Type</label></td>
 												<td>
 													<select class="form-control" name="account">
-				                                        <option>option 1</option>
-				                                        <option>option 2</option>
-				                                        <option>option 3</option>
-				                                        <option>option 4</option>
+				                                        <option>String</option>
+				                                        <option>Integer</option>
+				                                        <option>Date</option>
 													</select>
 			                                    </td>
 			                            	</tr>
@@ -113,8 +79,8 @@
 											<tr>
 			                            		<td></td>
 												<td class="form-inline">
-													<button type="button" class="btn btn-s btn-primary" style="margin-bottom: 0;">Create</button>
-													<button type="button" class="btn btn-s btn-default" style="margin-bottom: 0; margin-left: 10px">Cancel</button>
+													<input type="submit" name="add_column" value="Add Column" class="btn btn-s btn-primary" style="margin-bottom: 0;" />
+													<button type="button" id="cancel-btn" class="btn btn-s btn-default" style="margin-bottom: 0; margin-left: 10px">Cancel</button>
 												</td>
 		                            		</tr>
 	                           	 	</tbody>
@@ -122,66 +88,11 @@
                             	</form>
 	                        </div>
                         </div>
-                        
-                        <div class="ibox-content col-lg-12">
-	                        <h5>On Click Step 2 of 2</h5>
-	                        <div class="well col-lg-3">
-                            	<form role="form" class="form-inline">
-	                            	<table class="table" style="">
-		                            	<thead>
-			                            	<tr>
-			                            		<th colspan="3" style="text-align: center;"><h3>Add Column</h3></th>
-			                            	</tr>
-			                            </thead>
-			                            
-		                            	<tbody>
-			                            	<tr>
-			                            		<td style="vertical-align: middle;"><label class="col-lg-2 control-label">Name</label></td>
-												<td>Text</td>
-			                            	</tr>
-			                            	<tr>
-			                            		<td style="vertical-align: middle;"><label class="col-lg-2 control-label">Type</label></td>
-												<td>Text</td>
-			                            	</tr>
-			                            	<tr>
-			                            		<td style="vertical-align: middle;"><label class="col-lg-2 control-label" for="checkbox-null">Nullable</label></td>
-												<td>No</td>
-			                            	</tr>
-			                            	<tr>
-			                            		<td style="vertical-align: middle;"><label class="col-lg-2 control-label">Length</label></td>
-												<td>
-													<select class="form-control" name="account">
-				                                        <option>Specify</option>
-				                                        <option>option 2</option>
-				                                        <option>option 3</option>
-				                                        <option>option 4</option>
-													</select>
-			                                    </td>
-			                            	</tr>
-			                            	<tr>
-			                            		<td style="vertical-align: middle;"><label class="col-lg-2 control-label">Length</label></td>
-												<td><input type="text" placeholder="" class="form-control"></td>
-			                            	</tr>
-			                            	<tr>
-			                            		<td style="vertical-align: middle;"><label class="col-lg-2 control-label">Default</label></td>
-												<td><input type="text" placeholder="" class="form-control"></td>
-			                            	</tr>
-											<tr>
-			                            		<td></td>
-												<td class="form-inline">
-													<button type="button" class="btn btn-s btn-primary" style="margin-bottom: 0;">Create</button>
-													<button type="button" class="btn btn-s btn-default" style="margin-bottom: 0; margin-left: 10px">Cancel</button>
-												</td>
-		                            		</tr>
-	                           	 	</tbody>
-	                            	</table>
-                            	</form>
-	                        </div>
-                        </div>
-                        
                     <div class="ibox-content">
 
                     <div class="table-responsive">
+                    <form role="form" method="post" class="form-inline">
+                    {% csrf_token %}
 						<div class="dataTables_info" id="DataTables_Table_0_info" role="status" aria-live="polite" style="padding-bottom: 8px;">Showing 1 to 14 of 14 entries</div>
 						
                     <table class="table table-striped table-bordered table-hover dataTables-example" >
@@ -190,6 +101,7 @@
 	                    <th>#</th>
                         <th>Name</th>
                         <th>Type</th>
+                        <th>Sequence</th>
                         <th>Nullable</th>
                         <th>Length</th>
                         <th>Default</th>
@@ -197,49 +109,28 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr class="gradeC">
-	                    <td>1</td>
-	                    <td>Id</td>
-	                    <td>Auto Increment</td>
-	                    <td>No</td>
-	                    <td>32</td>
-	                    <td></td>
-                        <td>
-	                        <button type="button" class="btn btn-xs btn-success" style="margin-bottom: 0;">Edit</button>
-	                        <button type="button" class="btn btn-xs btn-default" style="margin-bottom: 0;">Delete</button>
-	                    </td>
-                    </tr>
                     
                     <tr class="gradeC">
-	                    <td>2</td>
-	                    <td>Active</td>
-	                    <td>Auto Increment</td>
+                        {% for column in columns %}
+                            <td>{{ column.id }}</td>
+                            <td>{{ column.name }}</td>
+                            <td>{{ column.type }}</td>
+                            <td>{{ column.sequence }}</td>
 	                    <td>No</td>
 	                    <td>32</td>
 	                    <td></td>
                         <td>
 	                        <button type="button" class="btn btn-xs btn-success" style="margin-bottom: 0;">Edit</button>
-	                        <button type="button" class="btn btn-xs btn-default" style="margin-bottom: 0;">Delete</button>
+                            <input type="hidden" name="column_id" value="{{ column.id }}">
+                            <input type="submit" name="delete_column" class="btn btn-xs btn-danger" style="margin-bottom: 0;" value="X" />
 	                    </td>
+
                     </tr>
-                    
-                    <tr class="gradeC">
-	                    <td>3</td>
-	                    <td>Cart_Product_Id</td>
-	                    <td>Auto Increment</td>
-	                    <td>No</td>
-	                    <td>32</td>
-	                    <td></td>
-                        <td>
-	                        <button type="button" class="btn btn-xs btn-success" style="margin-bottom: 0;">Edit</button>
-	                        <button type="button" class="btn btn-xs btn-default" style="margin-bottom: 0;">Delete</button>
-	                    </td>
-                    </tr>
-                   
-                   
+                        {% endfor %}
                     </tbody>
                     </table>
-                        </div>
+                    </form>
+                    </div>
 
                     </div>
                 </div>
@@ -249,16 +140,4 @@
 
         </div>
         </div>
-
-
-
-    <!-- Mainly scripts -->
-    <script src="js/jquery-2.1.1.js"></script>
-    <script src="js/bootstrap.min.js"></script>
-
-
-    <!-- Custom and plugin javascript -->
-
-</body>
-
-</html>
+{% endblock %}
