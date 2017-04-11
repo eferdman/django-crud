@@ -60,7 +60,7 @@
 											<tr>
 			                            		<td></td>
                                                     <td class="form-inline">
-													    <input type="submit" value="Create" class="btn btn-s btn-primary" style="margin-bottom: 0;" />
+													    <input type="submit" name="create_table" value="Create" class="btn btn-s btn-primary" style="margin-bottom: 0;" />
 													    <button type="button" id="cancel-btn" class="btn btn-s btn-default" style="margin-bottom: 0; margin-left: 10px">Cancel</button>
 												    </td>
 		                            		</tr>
@@ -87,10 +87,15 @@
                         <td>{{ user.id }}</td>
                         <td><a href="/insignia/columns/{{ user.id }}/">{{ user.table_name }}</a></td>
                         <td>
-                            <form action="" method="get" class="form-inline">
+                            <form style="display: inline;" action="" method="get" class="form-inline">
                                 <input type="hidden" name="id" value="{{ user.id }}" />
 	                            <input type="submit" name="edit_columns" value="Edit Columns" class="btn btn-xs btn-success" style="margin-bottom: 0;" />
                            	    <input type="submit" name="edit_data" value="Edit Data" class="btn btn-xs btn-primary" style="margin-bottom: 0;" />
+                            </form>
+                            <form action="" style="display: inline;" method="POST" class="form-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="id" value="{{ user.id }}" />
+                                <input type="submit" name="delete_row" value="X" class="btn btn-xs btn-danger" style="margin-bottom: 0;" />
                             </form>
 	                    </td>
                     </tr>

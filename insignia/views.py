@@ -9,14 +9,23 @@ import migrate.changeset
 
 def index(request):
     if request.method == 'POST':
-        user = "DefaultUser"
-        table_name = request.POST.get('table_name', '')
-        new_user = Users(name=user, table_name=table_name)
-        insert(new_user)
+        if request.POST.get('create_table'):
+            user = "DefaultUser"
+            table_name = request.POST.get('table_name', '')
+            new_user = Users(name=user, table_name=table_name)
+            insert(new_user)
 
-        # dynamically create the table one time
-        generate_table(new_user.id)
+            # dynamically create the table
+            generate_table(new_user.id)
+        elif request.POST.get('delete_row'):
+            id = request.POST.get('id', '')
+            row_to_delete = session.query(Users).filter_by(id=id).one()
+            delete(row_to_delete)
 
+            # delete the corresponding table
+            table_name = "table_{}".format(id)
+            table = Table(table_name, metadata)
+            table.drop()
         return HttpResponseRedirect('/insignia')
     else:
         if request.GET.get("edit_columns"):
@@ -85,22 +94,23 @@ def table_view(request, table_id):
         # insert new rows into user defined table
         if request.POST.get("add_row"):
             for column in columns:
-                table_values[column.name] = request.POST.get(column.name)
+                table_values[column.name] = request.POST.get(column.name, '')
             print("Table Values: {}".format(table_values))
             ins = table.insert().values(table_values)
             conn = engine.connect()
             conn.execute(ins)
             conn.close()
 
-            return redirect('/djang/table/{}'.format(table_id))
+            return redirect('/insignia/table/{}'.format(table_id))
         if request.POST.get("delete_row"):
-            row_id = request.POST.get('row_to_delete', '')
+            row_id = request.POST.get('row_id', '')
+            print("The Row ID is {}".format(row_id))
             conn = engine.connect()
             delete_st = table.delete().where(table.c.id == row_id)
             conn.execute(delete_st)
             conn.close()
 
-            return redirect('/djang/table/{}'.format(table_id))
+            return redirect('/insignia/table/{}'.format(table_id))
     else:
         table = {}
         table['name'] = session.query(Users).filter_by(id=table_id).one().table_name

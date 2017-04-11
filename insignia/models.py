@@ -29,7 +29,7 @@ class Columns(Base):
 	type = Column(String)
 	sequence = Column(Integer)
 
-	user = relationship('Users', backref=backref('cars', lazy='dynamic'))
+	user = relationship('Users', backref=backref('columns', lazy='dynamic', cascade="all, delete-orphan"))
 
 
 	def __init__(self, table_id, name, type, sequence):
