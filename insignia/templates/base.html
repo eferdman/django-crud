@@ -1,34 +1,49 @@
-{%  load static %}
+{% load static %}
 <!DOCTYPE html>
 <html>
-  <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>DTables</title>
-        <!-- Latest compiled and minified CSS -->
-        <link href="{% static 'insignia/css/bootstrap.min.css' %}" rel="stylesheet">
-        <link href="{% static 'insignia/font-awesome/css/font-awesome.css' %}" rel="stylesheet">
-        <link href="{% static 'insignia/css/plugins/dataTables/datatables.min.css' %}" rel="stylesheet">
-        <link href="{% static 'insignia/css/animate.css' %}" rel="stylesheet">
-        <link href="{% static 'insignia/css/style.css' %}" rel="stylesheet">
-        <link href="{% static 'insignia/css/main.css' %}" rel="stylesheet">
-        <script src="https://code.jquery.com/jquery-3.2.1.min.js"
-        integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
-        crossorigin="anonymous"></script>
-        <script>
-        $(document).ready(function(){
-            $("#popout_form").hide();
-            $("#create_button").click(function(){
-                $("#popout_form").toggle();
-            });
-            $("#cancel-btn").click(function(){
-                $("#popout_form").hide();
-            });
-        });
-        </script>
-  </head>
-  <body>
-  {% block content %}
-  {% endblock %}
-  <script src="{% static 'insignia/js/bootstrap.min.js' %}"></script>
-  </body>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DTables</title>
+    <!-- Latest compiled and minified CSS -->
+    <link href="{% static 'insignia/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'insignia/font-awesome/css/font-awesome.css' %}" rel="stylesheet">
+    <link href="{% static 'insignia/css/plugins/dataTables/datatables.min.css' %}" rel="stylesheet">
+    <link href="{% static 'insignia/css/animate.css' %}" rel="stylesheet">
+    <link href="{% static 'insignia/css/style.css' %}" rel="stylesheet">
+    <link href="{% static 'insignia/css/main.css' %}" rel="stylesheet">
+</head>
+<body>
+    <div id="wrapper">
+        <div id="page-wrapper" class="gray-bg">
+            <div class="row border-bottom">
+                <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0">
+                    <ul class="nav navbar-top-links navbar-left" style="margin-left: 20px;">
+                        <li>
+                            <a class="navbar-brand" href="/insignia">Table List</a>
+                        </li>
+                    </ul>
+                    <ul class="nav navbar-top-links navbar-right">
+                        <li>
+                            <a href="login.html">
+                                <i class="fa fa-sign-out"></i> Logout
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            <div class="row">
+                <div class="wrapper wrapper-content" >
+{#                animated fadeInRight">#}
+                    {% block content %}{% endblock %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"
+            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+            crossorigin="anonymous"></script>
+    <script src="{% static 'insignia/js/jquery-helper.js' %}"></script>
+    <script src="{% static 'insignia/js/ajax-helper.js' %}"></script>
+    <script src="{% static 'insignia/js/bootstrap.min.js' %}"></script>
+</body>
 </html>

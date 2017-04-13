@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 import sqlalchemy.orm
 from sqlalchemy import inspect, select, Table, Column, Integer, String, Unicode, MetaData, create_engine
 from insignia.models import Base, Users, Columns
@@ -25,7 +25,13 @@ def index(request):
             # delete the corresponding table
             table_name = "table_{}".format(id)
             table = Table(table_name, metadata)
-            table.drop()
+            if table.exists():
+                table.drop()
+        elif request.POST.get('update_row'):
+            id = request.POST.get('id', '')
+            row_to_update = session.query(Users).filter_by(id=id).one()
+            row_to_update.table_name = "NewerTable"
+            session.commit()
         return HttpResponseRedirect('/insignia')
     else:
         if request.GET.get("edit_columns"):
@@ -40,11 +46,20 @@ def index(request):
             return render(request, 'insignia/index.html', context)
 
 
+def validate(request):
+    if request.is_ajax():
+        user = request.POST.get('ajax_username', None)
+        data = {'is_taken': True}
+        return JsonResponse(data)
+
+
 def edit_columns(request, table_id):
     table_name = 'table_{}'.format(table_id)
-    columns = session.query(Columns).filter_by(table_id=table_id)
+    table = {}
+    table['columns'] = session.query(Columns).filter_by(table_id=table_id)
+    table['table_name'] = session.query(Users).filter_by(id=table_id).one().table_name
     print("edit_columns -- Rows in Columns:")
-    for col in columns:
+    for col in table['columns']:
         print(col)
     if request.method == 'POST':
         if request.POST.get("add_column"):
@@ -77,8 +92,11 @@ def edit_columns(request, table_id):
         elif request.POST.get("view_table"):
             return HttpResponseRedirect('/insignia/table/{}'.format(table_id))
     else:
-        context = {'columns': columns}
-        return render(request, 'insignia/edit-columns_interactions.html', context)
+        if request.GET.get("back_to_table"):
+            return redirect('/insignia/table/{}'.format(table_id))
+        else:
+            context = {'table': table}
+            return render(request, 'insignia/edit-columns_interactions.html', context)
 
 
 def table_view(request, table_id):
@@ -100,9 +118,7 @@ def table_view(request, table_id):
             conn = engine.connect()
             conn.execute(ins)
             conn.close()
-
-            return redirect('/insignia/table/{}'.format(table_id))
-        if request.POST.get("delete_row"):
+        elif request.POST.get("delete_row"):
             row_id = request.POST.get('row_id', '')
             print("The Row ID is {}".format(row_id))
             conn = engine.connect()
@@ -110,59 +126,22 @@ def table_view(request, table_id):
             conn.execute(delete_st)
             conn.close()
 
-            return redirect('/insignia/table/{}'.format(table_id))
+        return redirect('/insignia/table/{}'.format(table_id))
     else:
-        table = {}
-        table['name'] = session.query(Users).filter_by(id=table_id).one().table_name
+        if request.GET.get("back_to_columns"):
+            return HttpResponseRedirect('/insignia/columns/{}'.format(table_id))
+        else:
+            table = {}
+            table['name'] = session.query(Users).filter_by(id=table_id).one().table_name
 
-        inspector = inspect(engine)
-        table_columns = [c for c in inspector.get_columns(table_name)]
-        print("Inspector Columns: {}".format(table_columns))
-        table['columns'] = [c['name'] for c in inspector.get_columns(table_name)]
+            inspector = inspect(engine)
+            table_columns = [c for c in inspector.get_columns(table_name)]
+            print("Inspector Columns: {}".format(table_columns))
+            table['columns'] = [c['name'] for c in inspector.get_columns(table_name)]
 
-        # pass in fresh metadata instance, make sure to bind to engine
-        user_table = Table(table_name, MetaData(bind=engine), autoload=True)
-        table['rows'] = session.query(user_table).all()
+            # pass in fresh metadata instance, make sure to bind to engine
+            user_table = Table(table_name, MetaData(bind=engine), autoload=True)
+            table['rows'] = session.query(user_table).all()
 
-        context = {'table': table}
-        return render(request, 'insignia/table-edit.html', context)
-
-
-# long way to query rows from the dynamically generated table
-# def get_rows(table_name):
-    # pass in fresh MetaData() instance metadatas
-    # user_table = Table(table_name, MetaData(), autoload=True, autoload_with=engine)
-    # select_st = select([user_table])
-    # conn = engine.connect()
-    # res = conn.execute(select_st)
-    # conn.close()
-    # return res
-
-def generate_table(table_id):
-    class Dtable:
-        pass
-
-    table_name = 'table_{}'.format(table_id)
-
-    # create table with only id column
-    t = Table(table_name, metadata,
-              Column('id', Integer, primary_key=True))
-    # delete autoload = True;
-    # *(Column(col.name, String) for col in columns), extend_existing=True, autoload=True)
-    metadata.create_all()
-    mapper(Dtable, t)
-
-
-# Add a column to the dynamically generated table
-def add_column(table_name, column_name):
-    table = Table(table_name, metadata)
-    col = sqlalchemy.Column(column_name, String, default="default")
-    col.create(table, populate_default=True)
-    print("Type of Column: {}".format(type(col)))
-
-
-# Delete a column from the dynamically generated table
-def delete_column(table_name, column_name):
-    table = Table(table_name, metadata)
-    col = sqlalchemy.Column(column_name, String)
-    col.drop(table)
+            context = {'table': table}
+            return render(request, 'insignia/table-edit.html', context)
