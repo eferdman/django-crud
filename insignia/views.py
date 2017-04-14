@@ -27,11 +27,18 @@ def index(request):
             table = Table(table_name, metadata)
             if table.exists():
                 table.drop()
+        # elif request.POST.get('update_row'):
+        #     id = request.POST.get('id', '')
+        #     row_to_update = session.query(Users).filter_by(id=id).one()
+        #     row_to_update.table_name = "Apps"
+        #     session.commit()
         elif request.POST.get('update_row'):
-            id = request.POST.get('id', '')
-            row_to_update = session.query(Users).filter_by(id=id).one()
-            row_to_update.table_name = "NewerTable"
-            session.commit()
+            if request.POST.get('updated_table'):
+                updated_name = request.POST.get('updated_table', '')
+                id = request.POST.get('id', '')
+                row_to_update = session.query(Users).filter_by(id=id).one()
+                row_to_update.table_name = updated_name
+                session.commit()
         return HttpResponseRedirect('/insignia')
     else:
         if request.GET.get("edit_columns"):
@@ -41,7 +48,7 @@ def index(request):
             id = request.GET.get('id', '')
             return HttpResponseRedirect('/insignia/table/{}'.format(id))
         else:
-            users = session.query(Users).all()
+            users = session.query(Users).order_by(Users.id)
             context = {'users': users}
             return render(request, 'insignia/index.html', context)
 

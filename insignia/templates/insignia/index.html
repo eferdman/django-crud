@@ -17,13 +17,12 @@
         <div class="ibox-content">
             <form role="form" class="form-inline">
                 <button type="button" id="create_button" class="btn btn-w-m btn-success"
-                        style="margin-bottom: 0;">Create Table
+                        style="margin-bottom: 0;">Add Table
                 </button>
             </form>
         </div>
 
-        <div id="popout_form" class="ibox-content col-lg-12">
-            <h5>On Click</h5>
+        <div id="popout_form" class="ibox-content col-lg-12 hidden">
             <div class="well col-lg-3">
                 <form action="" method="post" role="form" class="form-inline">
                     {% csrf_token %}
@@ -73,8 +72,19 @@
                     {% for user in users %}
                         <tr class="gradeC">
                             <td>{{ user.id }}</td>
-                            <td><a href="/insignia/columns/{{ user.id }}/">{{ user.table_name }}</a></td>
+                            <td width="40%" data-editable>
+                               <form method="post">
+                                   {% csrf_token %}
+                                   <input type="hidden" name="id" value="{{ user.id }}"/>
+                                   <span id="table-name">{{ user.table_name }}</span>
+                                   <button name="update_row" value="update_row" type="submit" class="btn btn-xs btn-primary hidden" style="float: right; margin: 0;">
+                                       <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+                                   </button>
+                               </form>
+                            </td>
+{#                            <a href="/insignia/columns/{{ user.id }}/">{{ user.table_name }}</a>#}
                             <td>
+                                <div style="float: right">
                                 <form style="display: inline;" action="" method="get" class="form-inline">
                                     <input type="hidden" name="id" value="{{ user.id }}"/>
                                     <input type="submit" name="edit_columns" value="Edit Columns"
@@ -89,7 +99,7 @@
                                            class="btn btn-xs btn-primary" style="margin-bottom: 0;"/>
                                     <input type="submit" name="delete_row" value="X"
                                            class="btn btn-xs btn-danger" style="margin-bottom: 0;"/>
-                                </form>
+                                </form></div>
                             </td>
                         </tr>
                     {% endfor %}
