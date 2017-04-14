@@ -27,11 +27,6 @@ def index(request):
             table = Table(table_name, metadata)
             if table.exists():
                 table.drop()
-        # elif request.POST.get('update_row'):
-        #     id = request.POST.get('id', '')
-        #     row_to_update = session.query(Users).filter_by(id=id).one()
-        #     row_to_update.table_name = "Apps"
-        #     session.commit()
         elif request.POST.get('update_row'):
             if request.POST.get('updated_table'):
                 updated_name = request.POST.get('updated_table', '')

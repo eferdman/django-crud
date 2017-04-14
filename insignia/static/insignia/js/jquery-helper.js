@@ -19,21 +19,39 @@ $(document).ready(function () {
 
     $('body').on('click', 'td[data-editable]', function () {
 
+        // the cell the user clicks inside of
         var $el = $(this);
+        // The span containing the name
         var $span = $el.find('span');
-        var $input = $("<input />", {"placeholder": $span.text(), "name": "updated_table" })
+        // form in the cell
+        var $form = $el.find('form');
+
+        var $input = $("<input />", {"placeholder": $span.text(), "name": "updated_table", "id": "dynamic-input"})
             .css("border", "none")
             .css("background-color", "transparent")
             .css("outline", "transparent");
-        replaced = $span.replaceWith($input.focus());
+
+        // check if form already contains the input before adding it
+        // this should happen once
+        if (!$form.has("#dynamic-input").length) {
+            $form.prepend($input.focus());
+            $span.hide();
+
+        } else if ($form.has("#dynamic-input.hidden").length) {
+            $input = $form.find("#dynamic-input");
+            $input.toggleClass("hidden").focus();
+            $span.hide();
+        }
 
         var save = function () {
+            $span.show();
+            console.log("span should come back")
             $input.addClass("hidden");
-            $el.find('form').prepend(replaced);
         };
 
         // the 'blur' event is sent to an element when it loses focus
         // the one() method-- the handler is unbound after first invocation
+        $input = $form.find("#dynamic-input");
         $input.one('blur', save).focus();
     });
 

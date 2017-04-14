@@ -77,8 +77,11 @@
                                    {% csrf_token %}
                                    <input type="hidden" name="id" value="{{ user.id }}"/>
                                    <span id="table-name">{{ user.table_name }}</span>
-                                   <button name="update_row" value="update_row" type="submit" class="btn btn-xs btn-primary hidden" style="float: right; margin: 0;">
-                                       <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+                                   <button name="delete_row" value="delete_row" type="submit" class="btn btn-xs btn-danger hidden" style="float: right; margin: 0;">
+                                       <i class="fa fa-trash"></i>
+                                   </button>
+                                   <button name="update_row" value="update_row" type="submit" class="btn btn-xs btn-primary hidden" style="float: right; margin-bottom: 0; margin-right: 10px;">
+                                       <i class="fa fa-pencil-square-o"></i>
                                    </button>
                                </form>
                             </td>
@@ -97,7 +100,7 @@
                                     <input type="hidden" name="id" value="{{ user.id }}"/>
                                     <input type="submit" name="update_row" value="Update"
                                            class="btn btn-xs btn-primary" style="margin-bottom: 0;"/>
-                                    <input type="submit" name="delete_row" value="X"
+                                    <input type="submit" name="old_delete_row" value="X"
                                            class="btn btn-xs btn-danger" style="margin-bottom: 0;"/>
                                 </form></div>
                             </td>
