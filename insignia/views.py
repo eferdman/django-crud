@@ -4,6 +4,7 @@ import sqlalchemy.orm
 from sqlalchemy import inspect, select, Table, Column, Integer, String, Unicode, MetaData, create_engine
 from insignia.models import Base, Users, Columns
 from .helpers import *
+from .forms import MyForm
 import migrate.changeset
 
 
@@ -64,9 +65,19 @@ def edit_columns(request, table_id):
     for col in table['columns']:
         print(col)
     if request.method == 'POST':
+        if request.POST.get("select_column_type"):
+            form = MyForm(request.POST)
+            print(form.errors)
+            if form.is_valid():
+                selection = form.cleaned_data['my_choice_field']
+                #selection = request.POST.get('my_choice_field', '')
+                print("The choice was {}".format(selection))
+            return redirect('/insignia/columns/{}'.format(table_id))
         if request.POST.get("add_column"):
             name = request.POST.get('name', '')
-            type = "String"
+            form = MyForm(request.POST)
+            if form.is_valid():
+                column_type = form.cleaned_data['my_choice_field']
             sequence = "5"
 
             # check if that column already exists:
@@ -74,11 +85,11 @@ def edit_columns(request, table_id):
             column_names = [c['name'] for c in inspector.get_columns(table_name)]
             if name not in column_names:
                 # insert a row into the Columns table
-                new_column = Columns(table_id=table_id, name=name, type=type, sequence=sequence)
+                new_column = Columns(table_id=table_id, name=name, type=column_type, sequence=sequence)
                 insert(new_column)
 
                 # add column to dynamically generated table
-                add_column(table_name, name)
+                add_column(table_name, name, column_type)
             return redirect('/insignia/columns/{}'.format(table_id))
         elif request.POST.get("delete_column"):
             id = request.POST.get('column_id', '')
@@ -88,6 +99,7 @@ def edit_columns(request, table_id):
             delete(old_column)
 
             # delete corresponding column from dynamically generated table
+            # TODO: check if this exists before deleting
             delete_column(table_name, old_column.name)
 
             return redirect('/insignia/columns/{}'.format(table_id))
@@ -97,7 +109,8 @@ def edit_columns(request, table_id):
         if request.GET.get("back_to_table"):
             return redirect('/insignia/table/{}'.format(table_id))
         else:
-            context = {'table': table}
+            form = MyForm()
+            context = {'table': table, 'form': form}
             return render(request, 'insignia/edit-columns_interactions.html', context)
 
 

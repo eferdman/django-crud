@@ -1,6 +1,7 @@
 import sqlalchemy
 from sqlalchemy import Table, Column, Integer, String
 from sqlalchemy.orm import sessionmaker, mapper
+import sqlalchemy.types as sa_types
 
 from djang.models import Base
 
@@ -56,18 +57,16 @@ def generate_table(table_id):
     # create table with only id column
     t = Table(table_name, metadata,
               Column('id', Integer, primary_key=True))
-    # delete autoload = True;
     # *(Column(col.name, String) for col in columns), extend_existing=True, autoload=True)
     metadata.create_all()
     mapper(Dtable, t)
 
 
 # Add a column to the dynamically generated table
-def add_column(table_name, column_name):
+def add_column(table_name, column_name, column_type):
     table = Table(table_name, metadata)
-    col = sqlalchemy.Column(column_name, String, default="default")
+    col = sqlalchemy.Column(column_name, getattr(sa_types, column_type))
     col.create(table, populate_default=True)
-    print("Type of Column: {}".format(type(col)))
 
 
 # Delete a column from the dynamically generated table

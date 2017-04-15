@@ -45,11 +45,12 @@
                                 <td style="vertical-align: middle;"><label class="col-lg-2 control-label">Type</label>
                                 </td>
                                 <td>
-                                    <select class="form-control" name="account">
-                                        <option>String</option>
-                                        <option>Integer</option>
-                                        <option>Date</option>
-                                    </select>
+{#                                    <select class="form-control" name="account">#}
+{#                                        <option>String</option>#}
+{#                                        <option>Integer</option>#}
+{#                                        <option>Date</option>#}
+{#                                    </select>#}
+                                    {{ form }}
                                 </td>
                             </tr>
                             <tr>
@@ -121,10 +122,15 @@
                             {% endfor %}
                         </tbody>
                     </table>
-
                 </div>
-
             </div>
         </div>
     </div>
+
+    <form method="POST">
+    {% csrf_token %}
+        {{ form }}
+        <input type="submit" name="select_column_type">
+    </form>
+
 {% endblock %}
