@@ -39,19 +39,18 @@
                             <tr>
                                 <td style="vertical-align: middle;"><label class="col-lg-2 control-label">Name</label>
                                 </td>
-                                <td><input type="text" name="name" placeholder="Name" class="form-control"></td>
+                                <td><input required type="text" name="name" placeholder="Name" class="form-control"></td>
                             </tr>
                             <tr>
-                                <td style="vertical-align: middle;"><label class="col-lg-2 control-label">Type</label>
-                                </td>
+                                <td style="vertical-align: middle;"><label class="col-lg-2 control-label">Type</label></td>
                                 <td>
-{#                                    <select class="form-control" name="account">#}
-{#                                        <option>String</option>#}
-{#                                        <option>Integer</option>#}
-{#                                        <option>Date</option>#}
-{#                                    </select>#}
-                                    {{ form }}
+                                    <select name="data_type" class="form-control" id="">
+                                        {% for choice in table.data_types %}
+                                            <option value="{{ choice }}">{{ choice }}</option>
+                                        {% endfor %}
+                                    </select>
                                 </td>
+
                             </tr>
                             <tr>
                                 <td style="vertical-align: middle;"><label class="col-lg-2 control-label"
@@ -101,7 +100,16 @@
                         <tr class="gradeC">
                             {% for column in table.columns %}
                                 <td>{{ column.id }}</td>
-                                <td>{{ column.name }}</td>
+                                <td width="20%" data-editable>
+                                    <form method="post">
+                                       {% csrf_token %}
+                                        <input type="hidden" name="id" value="{{ column.id }}" />
+                                        <span id="column-name">{{ column.name }}</span>
+                                        <button name="update_column_name" value="update_column_name" type="submit" class="btn btn-xs btn-primary hidden" style="margin-bottom: 0; margin-right: 0; float: right;">
+                                            <i class="fa fa-pencil-square-o"></i>
+                                        </button>
+                                    </form>
+                                </td>
                                 <td>{{ column.type }}</td>
                                 <td>{{ column.sequence }}</td>
                                 <td>No</td>

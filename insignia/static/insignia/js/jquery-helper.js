@@ -3,7 +3,7 @@ $(document).ready(function () {
         $("#popout_form").toggleClass("hidden");
     });
     $("#cancel-btn").click(function () {
-        $("#popout_form").hide();
+        $("#popout_form").addClass("hidden");
     });
 
     // Edit on hover
@@ -26,7 +26,7 @@ $(document).ready(function () {
         // form in the cell
         var $form = $el.find('form');
 
-        var $input = $("<input />", {"placeholder": $span.text(), "name": "updated_table", "id": "dynamic-input"})
+        var $input = $("<input />", {"placeholder": $span.text(), "name": "updated_value", "id": "dynamic-input"})
             .css("border", "none")
             .css("background-color", "transparent")
             .css("outline", "transparent");
@@ -45,7 +45,6 @@ $(document).ready(function () {
 
         var save = function () {
             $span.show();
-            console.log("span should come back")
             $input.addClass("hidden");
         };
 
