@@ -89,9 +89,6 @@
                             <th>Name</th>
                             <th>Type</th>
                             <th>Sequence</th>
-                            <th>Nullable</th>
-                            <th>Length</th>
-                            <th>Default</th>
                             <th>Commands</th>
                         </tr>
                         </thead>
@@ -112,9 +109,6 @@
                                 </td>
                                 <td>{{ column.type }}</td>
                                 <td>{{ column.sequence }}</td>
-                                <td>No</td>
-                                <td>32</td>
-                                <td></td>
                                 <form role="form" method="post" class="form-inline">
                                     {% csrf_token %}
                                     <td>

@@ -4,7 +4,6 @@ import sqlalchemy.orm
 from sqlalchemy import inspect, select, Table, Column, Integer, String, Unicode, MetaData, create_engine
 from insignia.models import Base, Users, Columns
 from .helpers import *
-from .forms import MyForm
 import migrate.changeset
 
 
@@ -59,9 +58,12 @@ def validate(request):
 def edit_columns(request, table_id):
     table_name = 'table_{}'.format(table_id)
     inspector = inspect(engine)
-    column_names = [c['name'] for c in inspector.get_columns(table_name)]
+    column_tags = [c['name'] for c in inspector.get_columns(table_name)]
+    print(column_tags)
+    columns = session.query(Columns).filter_by(table_id=table_id).order_by(Columns.id).all()
     table = {
-        'columns': session.query(Columns).filter_by(table_id=table_id).order_by(Columns.id),
+        'columns': columns,
+        'column_names': [c.name for c in columns],
         'table_name': session.query(Users).filter_by(id=table_id).one().table_name,
         'data_types': {
             'Text': 'String',
@@ -74,9 +76,9 @@ def edit_columns(request, table_id):
             'Timestamp': 'DateTime',
             'Time': 'VARCHAR(5)',
             'Integer': 'BigInteger'
-        },
-        'column_names': column_names
+        }
     }
+    print(table['columns'])
     if request.method == 'POST':
         # user adds a column
         if request.POST.get("add_column"):
@@ -90,7 +92,7 @@ def edit_columns(request, table_id):
             sequence = "5"
 
             # check if that column already exists before adding:
-            if name not in column_names:
+            if name not in table['column_names']:
                 # insert a row into the Columns table
                 new_column = Columns(table_id=table_id, name=name, type=data_type, sequence=sequence)
                 insert(new_column)
@@ -111,8 +113,9 @@ def edit_columns(request, table_id):
             delete(old_column)
 
             # delete corresponding column from dynamically generated table
+            old_column_name = "col_{}".format(old_column.id)
             # TODO: check if this exists before deleting
-            delete_column(table_name, old_column.name)
+            delete_column(table_name, old_column_name)
         # user updates a column name
         elif request.POST.get("update_column_name"):
             if request.POST.get('updated_value'):
@@ -170,7 +173,6 @@ def table_view(request, table_id):
             inspector = inspect(engine)
             table_columns = [c for c in inspector.get_columns(table_name)]
             print("Inspector Columns: {}".format(table_columns))
-            #table['columns'] = [c['name'] for c in inspector.get_columns(table_name)]
             table['columns'] = [col.name for col in session.query(Columns).filter_by(table_id=table_id).all()]
             # pass in fresh metadata instance, make sure to bind to engine
             user_table = Table(table_name, MetaData(bind=engine), autoload=True)
