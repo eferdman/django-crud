@@ -1,0 +1,49 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DTables</title>
+    <!-- Latest compiled and minified CSS -->
+    <link href="{% static 'dtables/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'dtables/font-awesome/css/font-awesome.css' %}" rel="stylesheet">
+    <link href="{% static 'dtables/css/plugins/dataTables/datatables.min.css' %}" rel="stylesheet">
+    <link href="{% static 'dtables/css/animate.css' %}" rel="stylesheet">
+    <link href="{% static 'dtables/css/style.css' %}" rel="stylesheet">
+    <link href="{% static 'dtables/css/main.css' %}" rel="stylesheet">
+</head>
+<body>
+    <div id="wrapper">
+        <div id="page-wrapper" class="gray-bg">
+            <div class="row border-bottom">
+                <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0">
+                    <ul class="nav navbar-top-links navbar-left" style="margin-left: 20px;">
+                        <li>
+                            <a class="navbar-brand" href="/insignia">Table List</a>
+                        </li>
+                    </ul>
+                    <ul class="nav navbar-top-links navbar-right">
+                        <li>
+                            <a href="login.html">
+                                <i class="fa fa-sign-out"></i> Logout
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            <div class="row">
+                <div class="wrapper wrapper-content" >
+{#                animated fadeInRight">#}
+                    {% block content %}{% endblock %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"
+            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+            crossorigin="anonymous"></script>
+    <script src="{% static 'dtables/js/jquery-helper.js' %}"></script>
+    <script src="{% static 'dtables/js/ajax-helper.js' %}"></script>
+    <script src="{% static 'dtables/js/bootstrap.min.js' %}"></script>
+</body>
+</html>
