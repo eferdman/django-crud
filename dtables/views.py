@@ -13,43 +13,39 @@ session = Session()
 Base.metadata.create_all(engine)
 metadata = sqlalchemy.MetaData(bind=engine)
 
-# sqlstore 'Singleton' will get/set schema definition
 sqlstore = DTSchemaStoreSQL()
-
-# datastore 'Singleton' will get/set schema and data for user gen tables
 datastore = DTDataEngineSQL()
 
 
 def index(request):
-    # get the DTable object for the Users table
-    schema = sqlstore.get_schema('users')
-    data = schema.get_data()
+    if request.method == 'POST':
+        # user creates a new table
+        if request.POST.get('create_table'):
+            user = "DefaultUser"
+            table_name = request.POST.get('table_name', '')
 
-    # add a column to the current DTable
-    # schema.add_column(DTColumn('name', 'text'))
-
-    # update both the schema and the user generated table
-    # sqlstore.set_schema(12342, schema)
-    # datastore.set_schema(12342, schema)
-
-    # users = session.query(Users).order_by(Users.id)
+            new_table = sqlstore.gen_table(user, table_name)
+            datastore.set_schema(new_table)
     if request.GET.get("edit_columns"):
         id = request.GET.get('id', '')
         return HttpResponseRedirect('/dtables/columns/{}'.format(id))
 
-    context = {'users': data}
-    print(data)
+    users = session.query(Users).order_by(Users.id)
+    context = {'users': users}
     return render(request, 'dtables/index.html', context)
 
 
 def edit_columns(request, table_id):
-    # get the DTable object for the Columns Table
-    schema = sqlstore.get_schema('columns')
-    data = schema.get_data(table_id)
-    print(data)
+    # redirect to table editing view
+    if request.GET.get("back_to_table"):
+        return HttpResponseRedirect('/dtables/table/{}'.format(table_id))
 
-    context = {'table': data}
+    columns = session.query(Columns).filter_by(table_id=table_id).order_by(Columns.id).all()
+    context = {'table': columns}
     return render(request, 'dtables/edit-columns_interactions.html', context)
 
+
 def table_view(request, table_id):
-    pass
+    table = sqlstore.get_schema(table_id)
+    context = {'table': table}
+    return render(request, 'dtables/table-edit.html', context)
