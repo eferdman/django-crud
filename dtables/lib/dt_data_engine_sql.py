@@ -12,14 +12,13 @@ class DTDataEngineSQL:
         pass
 
     def set_schema(self, dtable):
-        # create the table if it does not exist in metadata
-        if not dtable.internal_name in metadata.tables:
-            self.gen_table(dtable.internal_name, dtable.table_id)
+        t = self.get_alchemy_table(dtable)
+        if not t.exists():
+            self.gen_table(dtable.internal_name)
         else:
-            pass
-        if 'add_column' in dtable.modifications:
-            dt_column = dtable.modifications['add_column']
-            self.add_column(dtable, dt_column)
+            if 'add_column' in dtable.modifications:
+                dt_column = dtable.modifications['add_column']
+                self.add_column(dtable, dt_column)
 
     def add_column(self, dtable, dt_column):
         table_id = dt_column.table_id
@@ -36,25 +35,29 @@ class DTDataEngineSQL:
 
     # set up foreign key relationship here ?
     # Add a new table to the db
-    def gen_table(self, internal_name, table_id):
+    def gen_table(self, internal_name):
         table = Table(internal_name, metadata, Column('id', Integer, primary_key=True))
         metadata.create_all()
 
     def get_row(self, dtable, id):
-        if dtable.internal_name in metadata.tables:
-            table = self.get_alchemy_table(dtable)
-            dt_row = session.query(table).filter_by(id=id).one()
-        return dt_row
+        table = self.get_alchemy_table(dtable)
+        if table.exists():
+            if session.query(table).filter_by(id=id).count():
+                dt_row = session.query(table).filter_by(id=id).one()
+                return dt_row
 
     def list_rows(self, dtable):
         dt_rows = []
-        if dtable.internal_name in metadata.tables:
-            table = self.get_alchemy_table(dtable)
+        table = self.get_alchemy_table(dtable)
+        if table.exists():
             dt_rows = session.query(table).all()
         return dt_rows
 
-    def get_alchemy_table(self, dtable):
-        return Table(dtable.internal_name, sqlalchemy.MetaData(bind=engine), autoload=True)
+    def get_alchemy_table(self, dtable, autoload=False):
+        if autoload:
+            return Table(dtable.internal_name, sqlalchemy.MetaData(bind=engine), autoload=True)
+        else:
+            return Table(dtable.internal_name, sqlalchemy.MetaData(bind=engine))
 
     # need a function to return a dtable_data.py
     def get_data_handle(self, dtable_instance):

@@ -6,7 +6,7 @@ from .dtcolumn import DTColumn
 
 # represents a user generated table
 class DTable:
-    def __init__(self, table_id, internal_name, table_name, dt_columns):
+    def __init__(self, table_name, dt_columns=None, table_id=None, internal_name=None):
         self.table_id = table_id
         self.internal_name = internal_name
         self.table_name = table_name
@@ -27,6 +27,8 @@ class DTable:
     # need to match in order to remove the correct item
     def remove_column(self):
         pass
+
+
 
     # print the parameters and the columns, types
     def __repr__(self):

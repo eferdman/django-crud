@@ -20,10 +20,10 @@ def index(request):
     if request.method == 'POST':
         # user creates a new table
         if request.POST.get('create_table'):
-            user = "DefaultUser"
             table_name = request.POST.get('table_name', '')
 
-            new_table = sqlstore.gen_table(user, table_name)
+            new_table = sqlstore.get_schema(table_name)
+            sqlstore.set_schema(new_table)
             datastore.set_schema(new_table)
     else:
         if request.GET.get("edit_columns"):
@@ -67,7 +67,7 @@ def edit_columns(request, table_id):
 
             # check if that column already exists before adding:
             if name not in column_names:
-                schema = sqlstore.get_schema(table_id)
+                schema = sqlstore.get_schema(None, table_id)
                 schema.add_column(DTColumn(table_id, name, data_type, sequence))
                 sqlstore.set_schema(schema)
                 datastore.set_schema(schema)
@@ -81,6 +81,6 @@ def edit_columns(request, table_id):
     return render(request, 'dtables/edit-columns_interactions.html', context)
 
 def table_view(request, table_id):
-    table = sqlstore.get_schema(table_id)
+    table = sqlstore.get_schema(None, table_id)
     context = {'table': table}
     return render(request, 'dtables/table-edit.html', context)
