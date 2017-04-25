@@ -62,13 +62,13 @@ def edit_columns(request, table_id):
         if request.POST.get("add_column"):
             name = request.POST.get('name', '')            # user defined name of column
             data_type = request.POST.get('data_type', '')  # user level data type
-            column_type = table['data_types'][data_type]   # db level data type
+            db_data_type = table['data_types'][data_type]   # db level data type
             sequence = "5"
 
             # check if that column already exists before adding:
             if name not in column_names:
                 schema = sqlstore.get_schema(None, table_id)
-                schema.add_column(DTColumn(table_id, name, data_type, sequence))
+                schema.add_column(DTColumn(table_id, name, data_type, db_data_type, sequence))
                 sqlstore.set_schema(schema)
                 datastore.set_schema(schema)
 

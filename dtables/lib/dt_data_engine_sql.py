@@ -23,7 +23,7 @@ class DTDataEngineSQL:
     def add_column(self, dtable, dt_column):
         table_id = dt_column.table_id
         name = dt_column.name
-        column_type = dt_column.column_type
+        column_type = dt_column.db_data_type
 
         # query the db for the id of newly created column
         id = session.query(Columns).filter_by(table_id=table_id).filter_by(name=name).one().id

@@ -18,7 +18,7 @@ class DTSchemaStoreSQL:
             columns = session.query(Columns).filter_by(table_id=table_id).all()
             columns.sort(key=lambda x: x.sequence)
             for column in columns:
-                dt_columns.append(DTColumn(column.id, column.name, column.type, column.sequence))
+                dt_columns.append(DTColumn(column.id, column.name, column.type, None, column.sequence))
 
             internal_name = "table_{}".format(table_id)
             table_name = session.query(Users).filter_by(id=table_id).one().table_name

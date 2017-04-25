@@ -28,8 +28,6 @@ class DTable:
     def remove_column(self):
         pass
 
-
-
     # print the parameters and the columns, types
     def __repr__(self):
         return "<DTable {} {} {}>".format(self.internal_name, self.table_id, self.table_name)
