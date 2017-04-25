@@ -25,6 +25,13 @@ def index(request):
             new_table = sqlstore.get_schema(table_name)
             sqlstore.set_schema(new_table)
             datastore.set_schema(new_table)
+        elif request.POST.get('delete_row'):
+            id = request.POST.get('id', '')
+
+            table = sqlstore.get_schema(table_name=None, table_id=id)
+            table.delete()
+            sqlstore.set_schema(table)
+            datastore.set_schema(table)
     else:
         if request.GET.get("edit_columns"):
             id = request.GET.get('id', '')

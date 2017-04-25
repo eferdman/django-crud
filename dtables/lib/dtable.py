@@ -24,6 +24,9 @@ class DTable:
             raise Exception("Invalid DTColumn Object")
         self.modifications['add_column'] = dt_column
 
+    def delete(self):
+        self.modifications['delete_table'] = True
+
     # need to match in order to remove the correct item
     def remove_column(self):
         pass

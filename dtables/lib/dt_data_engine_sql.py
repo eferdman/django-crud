@@ -19,6 +19,10 @@ class DTDataEngineSQL:
             if 'add_column' in dtable.modifications:
                 dt_column = dtable.modifications['add_column']
                 self.add_column(dtable, dt_column)
+            if 'delete_table' in dtable.modifications:
+                table = self.get_alchemy_table(dtable)
+                if table.exists():
+                    table.drop()
 
     def add_column(self, dtable, dt_column):
         table_id = dt_column.table_id

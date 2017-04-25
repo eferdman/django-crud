@@ -34,6 +34,9 @@ class DTSchemaStoreSQL:
             if 'add_column' in dtable.modifications:
                 dt_column = dtable.modifications['add_column']
                 self.add_column(dt_column)
+            if 'delete_table' in dtable.modifications:
+                row_to_delete = session.query(Users).filter_by(id=dtable.table_id).one()
+                delete(row_to_delete)
 
         # TODO: check if table "real name" exists or not when adding tables
 
