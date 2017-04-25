@@ -16,7 +16,6 @@ metadata = sqlalchemy.MetaData(bind=engine)
 sqlstore = DTSchemaStoreSQL()
 datastore = DTDataEngineSQL()
 
-
 def index(request):
     if request.method == 'POST':
         # user creates a new table
@@ -26,26 +25,60 @@ def index(request):
 
             new_table = sqlstore.gen_table(user, table_name)
             datastore.set_schema(new_table)
-            return render(request, 'dtables/index.html', context)
     else:
         if request.GET.get("edit_columns"):
             id = request.GET.get('id', '')
             return HttpResponseRedirect('/dtables/columns/{}'.format(id))
-
-        users = session.query(Users).order_by(Users.id)
-        context = {'users': users}
-        return render(request, 'dtables/index.html', context)
+        elif request.GET.get("edit_data"):
+            id = request.GET.get('id', '')
+            return HttpResponseRedirect('/dtables/table/{}'.format(id))
+    users = session.query(Users).order_by(Users.id)
+    context = {'users': users}
+    return render(request, 'dtables/index.html', context)
 
 
 def edit_columns(request, table_id):
+    columns = session.query(Columns).filter_by(table_id=table_id).order_by(Columns.id).all()
+    column_names = [c.name for c in columns]
+    table_name = session.query(Users).filter_by(id=table_id).one().table_name
+    table = {
+        'columns': columns,
+        'column_names': column_names,
+        'table_name': table_name,
+        'data_types': {
+            'Text': 'String',
+            'Checkbox': 'Boolean',
+            'SelectBox': 'BigInteger',
+            'Long Text': 'TEXT',
+            'Date': 'Date',
+            'Currency': 'DECIMAL',
+            'Number': 'Float',
+            'Timestamp': 'DateTime',
+            'Time': 'VARCHAR(5)',
+            'Integer': 'BigInteger'
+        }
+    }
+    if request.method == 'POST':
+        if request.POST.get("add_column"):
+            name = request.POST.get('name', '')            # user defined name of column
+            data_type = request.POST.get('data_type', '')  # user level data type
+            column_type = table['data_types'][data_type]   # db level data type
+            sequence = "5"
+
+            # check if that column already exists before adding:
+            if name not in column_names:
+                schema = sqlstore.get_schema(table_id)
+                schema.add_column(DTColumn(table_id, name, data_type, sequence))
+                sqlstore.set_schema(schema)
+                datastore.set_schema(schema)
+
+        return HttpResponseRedirect('/dtables/columns/{}'.format(table_id))
     # redirect to table editing view
     if request.GET.get("back_to_table"):
         return HttpResponseRedirect('/dtables/table/{}'.format(table_id))
 
-    columns = session.query(Columns).filter_by(table_id=table_id).order_by(Columns.id).all()
-    context = {'table': columns}
+    context = {'table': table}
     return render(request, 'dtables/edit-columns_interactions.html', context)
-
 
 def table_view(request, table_id):
     table = sqlstore.get_schema(table_id)

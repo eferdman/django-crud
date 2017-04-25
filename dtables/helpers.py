@@ -48,20 +48,6 @@ def get_rows_by_id(table, id):
     # conn.close()
     # return res
 
-def generate_table(table_id):
-    class Dtable:
-        pass
-
-    table_name = 'table_{}'.format(table_id)
-
-    # create table with only id column
-    t = Table(table_name, metadata,
-              Column('id', Integer, primary_key=True))
-    # *(Column(col.name, String) for col in columns), extend_existing=True, autoload=True)
-    metadata.create_all()
-    mapper(Dtable, t)
-
-
 # Add a column to the dynamically generated table
 def add_column(table_name, column_name, column_type):
     table = Table(table_name, metadata)
