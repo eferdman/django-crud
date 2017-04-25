@@ -28,8 +28,9 @@ class DTable:
         self.modifications['delete_table'] = True
 
     # need to match in order to remove the correct item
-    def remove_column(self):
-        pass
+    def delete_column(self, column_id):
+        column = session.query(Columns).filter_by(id=column_id).one()
+        self.modifications['delete_column'] = column
 
     # print the parameters and the columns, types
     def __repr__(self):

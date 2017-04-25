@@ -1,8 +1,9 @@
 from django.shortcuts import render, HttpResponseRedirect
 from dtables.models import Base, Users, Columns
-from .helpers import *
+import sqlalchemy
+from sqlalchemy.orm import sessionmaker
+import sqlalchemy.types as sa_types
 from .lib.dt_schema_store_sql import DTSchemaStoreSQL
-from .lib.dtable import DTable
 from .lib.dtcolumn import DTColumn
 from .lib.dt_data_engine_sql import DTDataEngineSQL
 import migrate.changeset
@@ -25,7 +26,7 @@ def index(request):
             new_table = sqlstore.get_schema(table_name)
             sqlstore.set_schema(new_table)
             datastore.set_schema(new_table)
-        elif request.POST.get('delete_row'):
+        elif request.POST.get('delete_table'):
             id = request.POST.get('id', '')
 
             table = sqlstore.get_schema(table_name=None, table_id=id)
@@ -78,6 +79,12 @@ def edit_columns(request, table_id):
                 schema.add_column(DTColumn(table_id, name, data_type, db_data_type, sequence))
                 sqlstore.set_schema(schema)
                 datastore.set_schema(schema)
+        elif request.POST.get("delete_column"):
+            column_id = request.POST.get('column_id', '')
+            schema = sqlstore.get_schema(None, table_id)
+            schema.delete_column(column_id)
+            sqlstore.set_schema(schema)
+            datastore.set_schema(schema)
 
         return HttpResponseRedirect('/dtables/columns/{}'.format(table_id))
     # redirect to table editing view

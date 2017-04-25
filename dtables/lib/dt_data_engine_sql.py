@@ -3,6 +3,7 @@ from ..helpers import *
 from .dtable_data import DTableData
 from dtables.models import Base, Users, Columns
 
+
 class DTDataEngineSQL:
     """A singleton instance of this class is responsible for getting and setting the schema for
        user generated tables. 
@@ -19,6 +20,9 @@ class DTDataEngineSQL:
             if 'add_column' in dtable.modifications:
                 dt_column = dtable.modifications['add_column']
                 self.add_column(dtable, dt_column)
+            if 'delete_column' in dtable.modifications:
+                column = dtable.modifications['delete_column']
+                self.delete_column(dtable, column)
             if 'delete_table' in dtable.modifications:
                 table = self.get_alchemy_table(dtable)
                 if table.exists():
@@ -34,9 +38,16 @@ class DTDataEngineSQL:
         # db column name in user defined table
         col_name = "col_{}".format(id)
 
-        table = self.get_alchemy_table(dtable.internal_name)
+        table = self.get_alchemy_table(dtable)
         col = sqlalchemy.Column(col_name, getattr(sa_types, column_type))
         col.create(table, populate_default=True)
+
+    # Delete a column from the dynamically generated table
+    def delete_column(self, dtable, column):
+        column_name = "col_{}".format(column.id)
+        table = self.get_alchemy_table(dtable, autoload=True)
+        col = sqlalchemy.Column(column_name, getattr(sa_types, column.type))
+        col.drop(table)
 
     # set up foreign key relationship here ?
     # Add a new table to the db
@@ -57,12 +68,6 @@ class DTDataEngineSQL:
         if table.exists():
             dt_rows = session.query(table).all()
         return dt_rows
-
-    # Delete a column from the dynamically generated table
-    def delete_column(table_name, column_name):
-        table = Table(table_name, metadata)
-        col = sqlalchemy.Column(column_name, String)
-        col.drop(table)
 
     def get_alchemy_table(self, dtable, autoload=False):
         if autoload:

@@ -34,6 +34,9 @@ class DTSchemaStoreSQL:
             if 'add_column' in dtable.modifications:
                 dt_column = dtable.modifications['add_column']
                 self.add_column(dt_column)
+            if 'delete_column' in dtable.modifications:
+                column = dtable.modifications['delete_column']
+                self.delete_column(column)
             if 'delete_table' in dtable.modifications:
                 row_to_delete = session.query(Users).filter_by(id=dtable.table_id).one()
                 self.delete(row_to_delete)
@@ -43,11 +46,15 @@ class DTSchemaStoreSQL:
     def add_column(self, dt_column):
         table_id = dt_column.table_id
         name = dt_column.name
-        column_type = dt_column.column_type
+        column_type = dt_column.db_data_type
         sequence = dt_column.sequence
 
         new_column = Columns(table_id=table_id, name=name, type=column_type, sequence=sequence)
         self.insert(new_column)
+
+    def delete_column(self, column):
+        session.delete(column)
+        session.commit()
 
     # Add the new table to the schema
     def gen_table(self, dtable):
@@ -61,9 +68,6 @@ class DTSchemaStoreSQL:
         session.add(row)
         session.commit()
 
-    def delete(self, row):
-        session.delete(row)
-        session.commit()
 
     def get_tables(self):
         pass
