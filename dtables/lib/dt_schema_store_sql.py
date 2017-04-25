@@ -36,7 +36,7 @@ class DTSchemaStoreSQL:
                 self.add_column(dt_column)
             if 'delete_table' in dtable.modifications:
                 row_to_delete = session.query(Users).filter_by(id=dtable.table_id).one()
-                delete(row_to_delete)
+                self.delete(row_to_delete)
 
         # TODO: check if table "real name" exists or not when adding tables
 
@@ -45,18 +45,25 @@ class DTSchemaStoreSQL:
         name = dt_column.name
         column_type = dt_column.column_type
         sequence = dt_column.sequence
-        # add row to Columns table using sqlalchemy
+
         new_column = Columns(table_id=table_id, name=name, type=column_type, sequence=sequence)
-        insert(new_column)
+        self.insert(new_column)
 
     # Add the new table to the schema
     def gen_table(self, dtable):
         new_table = Users(name="Default User", table_name=dtable.table_name)
-        session.add(new_table)
-        session.commit()
+        self.insert(new_table)
 
         dtable.table_id = new_table.id
         dtable.internal_name = "table_{}".format(new_table.id)
+
+    def insert(self, row):
+        session.add(row)
+        session.commit()
+
+    def delete(self, row):
+        session.delete(row)
+        session.commit()
 
     def get_tables(self):
         pass

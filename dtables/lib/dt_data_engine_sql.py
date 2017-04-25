@@ -34,8 +34,9 @@ class DTDataEngineSQL:
         # db column name in user defined table
         col_name = "col_{}".format(id)
 
-        # add column to dynamically generated table
-        add_column(dtable.internal_name, col_name, column_type)
+        table = self.get_alchemy_table(dtable.internal_name)
+        col = sqlalchemy.Column(col_name, getattr(sa_types, column_type))
+        col.create(table, populate_default=True)
 
     # set up foreign key relationship here ?
     # Add a new table to the db
@@ -56,6 +57,12 @@ class DTDataEngineSQL:
         if table.exists():
             dt_rows = session.query(table).all()
         return dt_rows
+
+    # Delete a column from the dynamically generated table
+    def delete_column(table_name, column_name):
+        table = Table(table_name, metadata)
+        col = sqlalchemy.Column(column_name, String)
+        col.drop(table)
 
     def get_alchemy_table(self, dtable, autoload=False):
         if autoload:
