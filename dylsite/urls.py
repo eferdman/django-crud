@@ -21,5 +21,6 @@ urlpatterns = [
     url(r'^dyltb/', include('dyltb.urls')),
     url(r'^djang/', include('djang.urls')),
     url(r'^insignia/', include('insignia.urls')),
+    url(r'^dtables/', include('dtables.urls')),
     url(r'^admin/', admin.site.urls),
 ]

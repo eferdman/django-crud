@@ -12,7 +12,7 @@ class DTDataEngineSQL:
 
     def set_schema(self, dtable):
         if not dtable.exists():
-            self.gen_table(dtable.internal_name, dtable.table_id)
+          self.gen_table(dtable.internal_name, dtable.table_id)
         else:
             pass
 

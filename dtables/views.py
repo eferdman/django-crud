@@ -26,13 +26,15 @@ def index(request):
 
             new_table = sqlstore.gen_table(user, table_name)
             datastore.set_schema(new_table)
-    if request.GET.get("edit_columns"):
-        id = request.GET.get('id', '')
-        return HttpResponseRedirect('/dtables/columns/{}'.format(id))
+            return render(request, 'dtables/index.html', context)
+    else:
+        if request.GET.get("edit_columns"):
+            id = request.GET.get('id', '')
+            return HttpResponseRedirect('/dtables/columns/{}'.format(id))
 
-    users = session.query(Users).order_by(Users.id)
-    context = {'users': users}
-    return render(request, 'dtables/index.html', context)
+        users = session.query(Users).order_by(Users.id)
+        context = {'users': users}
+        return render(request, 'dtables/index.html', context)
 
 
 def edit_columns(request, table_id):

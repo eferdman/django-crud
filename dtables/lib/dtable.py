@@ -10,13 +10,20 @@ class DTable:
         self.table_id = table_id
         self.internal_name = internal_name
         self.table_name = table_name
+
         self.table = Table(self.internal_name, sqlalchemy.MetaData(bind=engine), autoload=True)
-        self.rows = session.query(self.table).filter_by(table_id=table_id).all()
+        self.rows = get_rows()
         self.columns = dt_columns
 
     # expect DTColumn Objects
     def get_columns(self):
         return self.columns
+    
+    def get_rows(self):
+        rows = []
+        if self.exists():
+            rows = session.query(self.table).filter_by(table_id=table_id).all()
+        return rows
 
     # pass in a DTColumn object here
     def add_column(self, dt_column):
@@ -31,7 +38,7 @@ class DTable:
         pass
 
     def exists(self):
-        return self.table.exists()
+        return self.internal_name in meta.tables
 
     # print the parameters and the columns, types
     def __repr__(self):
