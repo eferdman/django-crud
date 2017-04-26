@@ -68,6 +68,5 @@ class DTSchemaStoreSQL:
         session.add(row)
         session.commit()
 
-
     def get_tables(self):
         pass

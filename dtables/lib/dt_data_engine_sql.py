@@ -1,7 +1,6 @@
-from sqlalchemy import Table, Column, DefaultClause
-from ..helpers import *
 from .dtable_data import DTableData
 from dtables.models import Base, Users, Columns
+from ..helpers import *
 
 
 class DTDataEngineSQL:
@@ -27,6 +26,7 @@ class DTDataEngineSQL:
                 table = self.get_alchemy_table(dtable)
                 if table.exists():
                     table.drop()
+            dtable.modifications = {}
 
     def add_column(self, dtable, dt_column):
         table_id = dt_column.table_id
