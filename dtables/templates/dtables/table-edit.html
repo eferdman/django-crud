@@ -30,6 +30,7 @@
 
                         <thead>
                         <tr>
+                            <th>Id</th>
                             {% for column in table.columns %}
                                 <th>{{ column.name }}</th>
                             {% endfor %}
@@ -40,8 +41,18 @@
                         <tbody>
                         {% for row in table.rows %}
                             <tr class="gradeC">
-                                {% for entry in row|slice:"2:" %}
-                                    <td>{{ entry }}</td>
+                                {% for entry in row %}
+                                    <td data-editable>
+                                        <form method="post">
+                                           {% csrf_token %}
+                                            <input type="hidden" name="id" value="{{ row.id }}">
+                                            <input type="hidden" name="entry_index" value="{{ forloop.counter0 }}">
+                                            <span id="row_value">{{ entry }}</span>
+                                            <button name="update_data" value="update_data" type="submit" class="btn btn-xs btn-primary hidden" style="margin-bottom: 0; margin-right: 0; float: right;">
+                                                <i class="fa fa-pencil-square-o"></i>
+                                            </button>
+                                        </form>
+                                    </td>
                                 {% endfor %}
                                 <form role="form" method="post" class="form-inline">
                                     {% csrf_token %}
@@ -61,6 +72,7 @@
                         <form role="form" method="post" class="form-inline">
                             {% csrf_token %}
                             <tr id="popout_form" class="gradeC">
+                                <td></td>
                                 {% for column in table.columns %}
                                     <td>
                                         <input type="text" class="form-control" placeholder="{{ column.name }}"

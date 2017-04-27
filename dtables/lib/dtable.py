@@ -2,6 +2,7 @@ from collections import OrderedDict
 from dtables.views import *
 from sqlalchemy import inspect
 from .dtcolumn import DTColumn
+from ..helpers import *
 
 
 # represents a user generated table
@@ -27,10 +28,15 @@ class DTable:
     def delete(self):
         self.modifications['delete_table'] = True
 
+    def update_name(self, updated_name):
+        self.modifications['update_name'] = updated_name
+
+    def update_column_name(self, column_id, updated_name):
+        self.modifications['update_column_name'] = (column_id, updated_name)
+
     # need to match in order to remove the correct item
-    def delete_column(self, column_id):
-        column = session.query(Columns).filter_by(id=column_id).one()
-        self.modifications['delete_column'] = column
+    def delete_column(self, column_id, column_type):
+        self.modifications['delete_column'] = (column_id, column_type)
 
     # print the parameters and the columns, types
     def __repr__(self):

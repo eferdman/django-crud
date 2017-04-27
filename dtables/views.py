@@ -17,6 +17,7 @@ metadata = sqlalchemy.MetaData(bind=engine)
 sqlstore = DTSchemaStoreSQL()
 datastore = DTDataEngineSQL()
 
+
 def index(request):
     if request.method == 'POST':
         # user creates a new table
@@ -33,6 +34,15 @@ def index(request):
             table.delete()
             sqlstore.set_schema(table)
             datastore.set_schema(table)
+        elif request.POST.get('update_row'):
+            if request.POST.get('updated_value'):
+                updated_name = request.POST.get('updated_value', '')
+                id = request.POST.get('id', '')
+
+                table = sqlstore.get_schema(table_name=None, table_id=id)
+                table.update_name(updated_name)
+                sqlstore.set_schema(table)
+        return HttpResponseRedirect('/dtables')
     else:
         if request.GET.get("edit_columns"):
             id = request.GET.get('id', '')
@@ -76,15 +86,24 @@ def edit_columns(request, table_id):
             # check if that column already exists before adding:
             if name not in column_names:
                 schema = sqlstore.get_schema(None, table_id)
-                schema.add_column(DTColumn(table_id, name, data_type, db_data_type, sequence))
+                schema.add_column(DTColumn(None, table_id, name, data_type, db_data_type, sequence))
                 sqlstore.set_schema(schema)
                 datastore.set_schema(schema)
         elif request.POST.get("delete_column"):
             column_id = request.POST.get('column_id', '')
             schema = sqlstore.get_schema(None, table_id)
-            schema.delete_column(column_id)
+            column_type = session.query(Columns).filter_by(id=column_id).one().type
+            schema.delete_column(column_id, column_type)
             sqlstore.set_schema(schema)
             datastore.set_schema(schema)
+        elif request.POST.get("update_column_name"):
+            if request.POST.get('updated_value'):
+                updated_name = request.POST.get('updated_value', '')
+                column_id = request.POST.get('id', '')
+
+                table = sqlstore.get_schema(table_name=None, table_id=table_id)
+                table.update_column_name(column_id, updated_name)
+                sqlstore.set_schema(table)
 
         return HttpResponseRedirect('/dtables/columns/{}'.format(table_id))
     # redirect to table editing view
@@ -94,7 +113,43 @@ def edit_columns(request, table_id):
     context = {'table': table}
     return render(request, 'dtables/edit-columns_interactions.html', context)
 
+
 def table_view(request, table_id):
-    table = sqlstore.get_schema(None, table_id)
-    context = {'table': table}
-    return render(request, 'dtables/table-edit.html', context)
+    table_name = 'table_{}'.format(table_id)
+    dtable = sqlstore.get_schema(table_name, table_id)
+    handle = datastore.get_data_handle(dtable)
+    rows = handle.list_rows()
+    print(rows)
+    table = {
+        'rows': rows,
+        'columns': dtable.columns,
+        'table_name': dtable.table_name
+    }
+    data = {}
+    if request.method == 'POST':
+        if request.POST.get("add_row"):
+            for column in table['columns']:
+                col_name = "col_{}".format(column.id)
+                data[col_name] = request.POST.get(column.name, '')
+            print("Table Values: {}".format(data))
+            handle.add_row(dtable, data)
+        elif request.POST.get("delete_row"):
+            row_id = request.POST.get('row_id', '')
+            handle.delete_row(dtable, row_id)
+        elif request.POST.get("update_data"):
+            if request.POST.get('updated_value'):
+                updated_value = request.POST.get('updated_value', '')
+                row_id = request.POST.get('id', '')
+                index = request.POST.get('entry_index', '')
+
+                row = handle.get_row(row_id)
+                column_name = row.keys()[int(index)]
+                data = {column_name: updated_value}
+                handle.update_row(dtable, row_id, data)
+        return HttpResponseRedirect('/dtables/table/{}'.format(table_id))
+    else:
+        if request.GET.get("back_to_columns"):
+            return HttpResponseRedirect('/dtables/columns/{}'.format(table_id))
+
+        context = {'table': table}
+        return render(request, 'dtables/table-edit.html', context)

@@ -18,7 +18,7 @@ class DTSchemaStoreSQL:
             columns = session.query(Columns).filter_by(table_id=table_id).all()
             columns.sort(key=lambda x: x.sequence)
             for column in columns:
-                dt_columns.append(DTColumn(column.id, column.name, column.type, None, column.sequence))
+                dt_columns.append(DTColumn(column.id, column.table_id, column.name, column.type, None, column.sequence))
 
             internal_name = "table_{}".format(table_id)
             table_name = session.query(Users).filter_by(id=table_id).one().table_name
@@ -35,13 +35,31 @@ class DTSchemaStoreSQL:
                 dt_column = dtable.modifications['add_column']
                 self.add_column(dt_column)
             if 'delete_column' in dtable.modifications:
-                column = dtable.modifications['delete_column']
-                self.delete_column(column)
+                column_id = dtable.modifications['delete_column'][0]
+                column = session.query(Columns).filter_by(id=column_id).one()
+                self.delete(column)
             if 'delete_table' in dtable.modifications:
-                row_to_delete = session.query(Users).filter_by(id=dtable.table_id).one()
-                self.delete(row_to_delete)
+                table = session.query(Users).filter_by(id=dtable.table_id).one()
+                self.delete(table)
+            if 'update_name' in dtable.modifications:
+                updated_name = dtable.modifications['update_name']
+                self.update_name(dtable, updated_name)
+                dtable.modifications = {}
+            if 'update_column_name' in dtable.modifications:
+                column_id = dtable.modifications['update_column_name'][0]
+                updated_name = dtable.modifications['update_column_name'][1]
+                self.update_column_name(column_id, updated_name)
+                dtable.modifications = {}
 
-        # TODO: check if table "real name" exists or not when adding tables
+    def update_name(self, dtable, updated_name):
+        table = session.query(Users).filter_by(id=dtable.table_id).one()
+        table.table_name = updated_name
+        session.commit()
+
+    def update_column_name(self, column_id, updated_name):
+        column = session.query(Columns).filter_by(id=column_id).one()
+        column.name = updated_name
+        session.commit()
 
     def add_column(self, dt_column):
         table_id = dt_column.table_id
@@ -52,8 +70,8 @@ class DTSchemaStoreSQL:
         new_column = Columns(table_id=table_id, name=name, type=column_type, sequence=sequence)
         self.insert(new_column)
 
-    def delete_column(self, column):
-        session.delete(column)
+    def delete(self, row):
+        session.delete(row)
         session.commit()
 
     # Add the new table to the schema
