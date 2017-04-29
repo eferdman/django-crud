@@ -18,7 +18,7 @@ class DTSchemaStoreSQL:
             columns = session.query(Columns).filter_by(table_id=table_id).all()
             columns.sort(key=lambda x: x.sequence)
             for column in columns:
-                dt_columns.append(DTColumn(column.id, column.table_id, column.name, column.type, None, column.sequence))
+                dt_columns.append(DTColumn(column.id, column.table_id, column.name, column.type, None))
 
             internal_name = "table_{}".format(table_id)
             table_name = session.query(Users).filter_by(id=table_id).one().table_name
@@ -37,7 +37,7 @@ class DTSchemaStoreSQL:
             if 'delete_column' in dtable.modifications:
                 column_id = dtable.modifications['delete_column'][0]
                 column = session.query(Columns).filter_by(id=column_id).one()
-                self.delete(column)
+                self.delete_column(dtable, column)
             if 'delete_table' in dtable.modifications:
                 table = session.query(Users).filter_by(id=dtable.table_id).one()
                 self.delete(table)
@@ -65,10 +65,33 @@ class DTSchemaStoreSQL:
         table_id = dt_column.table_id
         name = dt_column.name
         column_type = dt_column.db_data_type
-        sequence = dt_column.sequence
+
+        columns = session.query(Columns).filter_by(table_id=table_id).order_by(Columns.sequence).all()
+        if not columns:
+            sequence = 0
+        else:
+            sequence = columns.pop().sequence + 1
 
         new_column = Columns(table_id=table_id, name=name, type=column_type, sequence=sequence)
         self.insert(new_column)
+
+    def delete_column(self, dtable, column):
+        columns = session.query(Columns).filter_by(table_id=dtable.table_id).order_by(Columns.sequence).all()
+
+        sequence = column.sequence
+        last_sequence = len(columns) - 1
+
+        session.delete(column)
+        session.commit()
+
+        if sequence < last_sequence:
+            next_sequence = sequence + 1
+            for column in columns[sequence+1:]:
+                queried_column = session.query(Columns).\
+                    filter_by(table_id=dtable.table_id).filter_by(sequence=next_sequence).one()
+                queried_column.sequence -= 1
+                next_sequence += 1
+        session.commit()
 
     def delete(self, row):
         session.delete(row)

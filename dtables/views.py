@@ -56,7 +56,7 @@ def index(request):
 
 
 def edit_columns(request, table_id):
-    columns = session.query(Columns).filter_by(table_id=table_id).order_by(Columns.id).all()
+    columns = session.query(Columns).filter_by(table_id=table_id).order_by(Columns.sequence).all()
     column_names = [c.name for c in columns]
     table_name = session.query(Users).filter_by(id=table_id).one().table_name
     table = {
@@ -81,12 +81,11 @@ def edit_columns(request, table_id):
             name = request.POST.get('name', '')            # user defined name of column
             data_type = request.POST.get('data_type', '')  # user level data type
             db_data_type = table['data_types'][data_type]   # db level data type
-            sequence = "5"
 
             # check if that column already exists before adding:
             if name not in column_names:
                 schema = sqlstore.get_schema(None, table_id)
-                schema.add_column(DTColumn(None, table_id, name, data_type, db_data_type, sequence))
+                schema.add_column(DTColumn(None, table_id, name, data_type, db_data_type))
                 sqlstore.set_schema(schema)
                 datastore.set_schema(schema)
         elif request.POST.get("delete_column"):
