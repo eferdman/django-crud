@@ -15,7 +15,7 @@
             </div>
 
             <div class="ibox-content">
-                <form role="form" method="GET" class="form-inline">
+                <form role="form" method="GET" class="form-inline" >
                     <button type="button" id="create_button" class="btn btn-w-m btn-success" style="margin-bottom: 0;">
                         Add Column
                     </button>
@@ -102,7 +102,16 @@
                                     </form>
                                 </td>
                                 <td>{{ column.type }}</td>
-                                <td>{{ column.sequence }}</td>
+                                <td data-editable width="20%">
+                                    <form method="post">
+                                       {% csrf_token %}
+                                        <input type="hidden" name="id" value="{{ column.id }}" />
+                                        <span id="column-sequence">{{ column.sequence }}</span>
+                                        <button name="update_column_seq" value="update_column_seq" type="submit" class="btn btn-xs btn-primary hidden" style="margin-bottom: 0; margin-right: 0; float: right;">
+                                            <i class="fa fa-pencil-square-o"></i>
+                                        </button>
+                                    </form>
+                                </td>
                                 <form role="form" method="post" class="form-inline">
                                     {% csrf_token %}
                                     <td>

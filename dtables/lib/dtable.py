@@ -38,6 +38,9 @@ class DTable:
     def delete_column(self, column_id, column_type):
         self.modifications['delete_column'] = (column_id, column_type)
 
+    def update_column_sequence(self, column_id, new_sequence):
+        self.modifications['update_column_sequence'] = (column_id, new_sequence)
+
     # print the parameters and the columns, types
     def __repr__(self):
         return "<DTable {} {} {}>".format(self.internal_name, self.table_id, self.table_name)

@@ -50,6 +50,11 @@ class DTSchemaStoreSQL:
                 updated_name = dtable.modifications['update_column_name'][1]
                 self.update_column_name(column_id, updated_name)
                 dtable.modifications = {}
+            if 'update_column_sequence' in dtable.modifications:
+                column_id = dtable.modifications['update_column_sequence'][0]
+                new_sequence = dtable.modifications['update_column_sequence'][1]
+                self.update_column_sequence(dtable, column_id, new_sequence)
+                dtable.modifications = {}
 
     def update_name(self, dtable, updated_name):
         table = session.query(Users).filter_by(id=dtable.table_id).one()
@@ -80,17 +85,37 @@ class DTSchemaStoreSQL:
 
         sequence = column.sequence
         last_sequence = len(columns) - 1
-
         session.delete(column)
-        session.commit()
 
         if sequence < last_sequence:
-            next_sequence = sequence + 1
             for column in columns[sequence+1:]:
                 queried_column = session.query(Columns).\
-                    filter_by(table_id=dtable.table_id).filter_by(sequence=next_sequence).one()
-                queried_column.sequence -= 1
-                next_sequence += 1
+                    filter_by(table_id=dtable.table_id).filter_by(sequence=column.sequence).one()
+                queried_column.sequence = queried_column.sequence - 1
+        session.commit()
+
+    def update_column_sequence(self, dtable, column_id, new_sequence):
+        new_sequence = int(new_sequence)
+        columns = session.query(Columns).\
+            filter_by(table_id=dtable.table_id).order_by(Columns.sequence).all()
+        column_to_update = session.query(Columns).\
+            filter_by(id=column_id).one()
+        old_sequence = column_to_update.sequence
+        if new_sequence < old_sequence:
+            columns_to_alter = columns[new_sequence:old_sequence]
+            columns_to_alter.reverse()
+            for column in columns_to_alter:
+                print("Updating column: {}".format(column))
+                queried_column = session.query(Columns).\
+                    filter_by(table_id=dtable.table_id).filter_by(sequence=column.sequence).one()
+                queried_column.sequence = queried_column.sequence + 1
+        else:
+            for column in columns[old_sequence+1:new_sequence+1]:
+                queried_column = session.query(Columns).\
+                    filter_by(table_id=dtable.table_id).filter_by(sequence=column.sequence).one()
+                queried_column.sequence = queried_column.sequence - 1
+
+        column_to_update.sequence = new_sequence
         session.commit()
 
     def delete(self, row):

@@ -56,9 +56,16 @@ def index(request):
 
 
 def edit_columns(request, table_id):
-    columns = session.query(Columns).filter_by(table_id=table_id).order_by(Columns.sequence).all()
+    session.commit()
+    columns = session.query(Columns).\
+        filter_by(table_id=table_id).\
+        order_by(Columns.sequence).\
+        all()
+    print("Queried Columns: {}".format(columns))
     column_names = [c.name for c in columns]
-    table_name = session.query(Users).filter_by(id=table_id).one().table_name
+    table_name = session.query(Users).\
+        filter_by(id=table_id).\
+        one().table_name
     table = {
         'columns': columns,
         'column_names': column_names,
@@ -103,12 +110,47 @@ def edit_columns(request, table_id):
                 table = sqlstore.get_schema(table_name=None, table_id=table_id)
                 table.update_column_name(column_id, updated_name)
                 sqlstore.set_schema(table)
+        elif request.POST.get("update_column_seq"):
+            if request.POST.get("updated_value"):
+                new_sequence = request.POST.get('updated_value', '')
+                column_id = request.POST.get('id', '')
 
-        return HttpResponseRedirect('/dtables/columns/{}'.format(table_id))
+                table = sqlstore.get_schema(table_name=None, table_id=table_id)
+                table.update_column_sequence(column_id, new_sequence)
+                sqlstore.set_schema(table)
+
     # redirect to table editing view
     if request.GET.get("back_to_table"):
         return HttpResponseRedirect('/dtables/table/{}'.format(table_id))
 
+    session.commit() # TODO: fix the session variable
+    columns = session.query(Columns). \
+        filter_by(table_id=table_id). \
+        order_by(Columns.sequence)
+    columns = columns.all()
+    print(columns)
+    column_names = [c.name for c in columns]
+    table_name = session.query(Users). \
+        filter_by(id=table_id). \
+        one().table_name
+    table = {
+        'columns': columns,
+        'column_names': column_names,
+        'table_name': table_name,
+        'table_id': table_id,
+        'data_types': {
+            'Text': 'String',
+            'Checkbox': 'Boolean',
+            'SelectBox': 'BigInteger',
+            'Long Text': 'TEXT',
+            'Date': 'Date',
+            'Currency': 'DECIMAL',
+            'Number': 'Float',
+            'Timestamp': 'DateTime',
+            'Time': 'VARCHAR(5)',
+            'Integer': 'BigInteger'
+        }
+    }
     context = {'table': table}
     return render(request, 'dtables/edit-columns_interactions.html', context)
 
