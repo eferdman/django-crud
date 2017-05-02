@@ -41,7 +41,6 @@ def index(request):
                 table = sqlstore.get_schema(table_name=None, table_id=id)
                 table.update_name(updated_name)
                 sqlstore.set_schema(table)
-        return HttpResponseRedirect('/dtables')
     else:
         if request.GET.get("edit_columns"):
             id = request.GET.get('id', '')
@@ -55,37 +54,28 @@ def index(request):
 
 
 def edit_columns(request, table_id):
-    columns = session.query(Columns).\
-        filter_by(table_id=table_id).\
-        order_by(Columns.sequence).\
-        all()
-    print("Queried Columns: {}".format(columns))
-    column_names = [c.name for c in columns]
-    table_name = session.query(Users).\
-        filter_by(id=table_id).\
-        one().table_name
-    table = {
-        'columns': columns,
-        'column_names': column_names,
-        'table_name': table_name,
-        'data_types': {
-            'Text': 'String',
-            'Checkbox': 'Boolean',
-            'SelectBox': 'BigInteger',
-            'Long Text': 'TEXT',
-            'Date': 'Date',
-            'Currency': 'DECIMAL',
-            'Number': 'Float',
-            'Timestamp': 'DateTime',
-            'Time': 'VARCHAR(5)',
-            'Integer': 'BigInteger'
-        }
-    }
     if request.method == 'POST':
         if request.POST.get("add_column"):
+            columns = session.query(Columns). \
+                filter_by(table_id=table_id). \
+                order_by(Columns.sequence). \
+                all()
+            column_names = [c.name for c in columns]
+            data_types = {
+                'Text': 'String',
+                'Checkbox': 'Boolean',
+                'SelectBox': 'BigInteger',
+                'Long Text': 'TEXT',
+                'Date': 'Date',
+                'Currency': 'DECIMAL',
+                'Number': 'Float',
+                'Timestamp': 'DateTime',
+                'Time': 'VARCHAR(5)',
+                'Integer': 'BigInteger'
+            }
             name = request.POST.get('name', '')            # user defined name of column
             data_type = request.POST.get('data_type', '')  # user level data type
-            db_data_type = table['data_types'][data_type]   # db level data type
+            db_data_type = data_types[data_type]   # db level data type
 
             # check if that column already exists before adding:
             if name not in column_names:
@@ -183,10 +173,9 @@ def table_view(request, table_id):
                 column_name = row.keys()[int(index)]
                 data = {column_name: updated_value}
                 handle.update_row(dtable, row_id, data)
-        return HttpResponseRedirect('/dtables/table/{}'.format(table_id))
-    else:
-        if request.GET.get("back_to_columns"):
-            return HttpResponseRedirect('/dtables/columns/{}'.format(table_id))
 
-        context = {'table': table}
-        return render(request, 'dtables/table-edit.html', context)
+    if request.GET.get("back_to_columns"):
+        return HttpResponseRedirect('/dtables/columns/{}'.format(table_id))
+
+    context = {'table': table}
+    return render(request, 'dtables/table-edit.html', context)
