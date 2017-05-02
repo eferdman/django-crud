@@ -2,7 +2,6 @@ from django.shortcuts import render, HttpResponseRedirect
 from dtables.models import Base, Users, Columns
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker
-import sqlalchemy.types as sa_types
 from .lib.dt_schema_store_sql import DTSchemaStoreSQL
 from .lib.dtcolumn import DTColumn
 from .lib.dt_data_engine_sql import DTDataEngineSQL
@@ -14,9 +13,8 @@ session = Session()
 Base.metadata.create_all(engine)
 metadata = sqlalchemy.MetaData(bind=engine)
 
-sqlstore = DTSchemaStoreSQL()
-datastore = DTDataEngineSQL()
-
+sqlstore = DTSchemaStoreSQL(session, metadata)
+datastore = DTDataEngineSQL(engine, session, metadata)
 
 def index(request):
     if request.method == 'POST':
@@ -56,7 +54,6 @@ def index(request):
 
 
 def edit_columns(request, table_id):
-    session.commit()
     columns = session.query(Columns).\
         filter_by(table_id=table_id).\
         order_by(Columns.sequence).\
@@ -123,12 +120,10 @@ def edit_columns(request, table_id):
     if request.GET.get("back_to_table"):
         return HttpResponseRedirect('/dtables/table/{}'.format(table_id))
 
-    session.commit() # TODO: fix the session variable
     columns = session.query(Columns). \
         filter_by(table_id=table_id). \
         order_by(Columns.sequence)
     columns = columns.all()
-    print(columns)
     column_names = [c.name for c in columns]
     table_name = session.query(Users). \
         filter_by(id=table_id). \
@@ -160,7 +155,7 @@ def table_view(request, table_id):
     dtable = sqlstore.get_schema(table_name, table_id)
     handle = datastore.get_data_handle(dtable)
     rows = handle.list_rows()
-    print(rows)
+    print("Rows in Table: {}".format(rows))
     table = {
         'rows': rows,
         'columns': dtable.columns,

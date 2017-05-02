@@ -1,6 +1,8 @@
 from .dtable_data import DTableData
 from dtables.models import Base, Users, Columns
-from ..helpers import *
+import sqlalchemy
+from sqlalchemy import Column, Table, Integer, MetaData
+import sqlalchemy.types as sa_types
 
 
 class DTDataEngineSQL:
@@ -8,8 +10,10 @@ class DTDataEngineSQL:
        user generated tables. 
        Adding, Removing, Altering Columns
        """
-    def __init__(self):
-        pass
+    def __init__(self, engine, session, metadata):
+        self.engine = engine
+        self.session = session
+        self.metadata = metadata
 
     def set_schema(self, dtable):
         t = self.get_alchemy_table(dtable)
@@ -35,7 +39,7 @@ class DTDataEngineSQL:
         column_type = dt_column.db_data_type
 
         # query the db for the id of newly created column
-        id = session.query(Columns).filter_by(table_id=table_id).filter_by(name=name).one().id
+        id = self.session.query(Columns).filter_by(table_id=table_id).filter_by(name=name).one().id
         # db column name in user defined table
         col_name = "col_{}".format(id)
 
@@ -53,47 +57,50 @@ class DTDataEngineSQL:
     # set up foreign key relationship here ?
     # Add a new table to the db
     def gen_table(self, internal_name):
-        table = Table(internal_name, metadata, Column('id', Integer, primary_key=True))
-        metadata.create_all()
+        table = Table(internal_name, self.metadata, Column('id', Integer, primary_key=True), extend_existing=True)
+        self.metadata.create_all()
 
     def get_row(self, dtable, id):
         table = self.get_alchemy_table(dtable)
         if table.exists():
             table = self.get_alchemy_table(dtable, autoload=True)
-            if session.query(table).filter_by(id=id).count():
-                dt_row = session.query(table).filter_by(id=id).one()
+            if self.session.query(table).filter_by(id=id).count():
+                dt_row = self.session.query(table).filter_by(id=id).one()
                 return dt_row
 
+    # when columns change order, this array is out of order
     def list_rows(self, dtable):
         dt_rows = []
         table = self.get_alchemy_table(dtable)
         if table.exists():
             table = self.get_alchemy_table(dtable, autoload=True)
-            dt_rows = session.query(table).order_by('id').all()
+            if self.session.query(table).count():
+                dt_rows = self.session.query(table).all()
+                print("dt_rows: {}".format(dt_rows))
         return dt_rows
 
     def add_row(self, dtable, data):
         table = self.get_alchemy_table(dtable, autoload=True)
         insert = table.insert().values(data)
-        conn = engine.connect().execute(insert)
+        conn = self.engine.connect().execute(insert)
         conn.close()
 
     def update_row(self, dtable, row_id, data):
         table = self.get_alchemy_table(dtable, autoload=True)
-        session.query(table).filter_by(id=row_id).update(data, synchronize_session=False)
-        session.commit()
+        self.session.query(table).filter_by(id=row_id).update(data, synchronize_session=False)
+        self.session.commit()
 
     def delete_row(self, dtable, row_id):
         table = self.get_alchemy_table(dtable, autoload=True)
         delete_st = table.delete().where(table.c.id == row_id)
-        conn = engine.connect().execute(delete_st)
+        conn = self.engine.connect().execute(delete_st)
         conn.close()
 
     def get_alchemy_table(self, dtable, autoload=False):
         if autoload:
-            return Table(dtable.internal_name, sqlalchemy.MetaData(bind=engine), autoload=True)
+            return Table(dtable.internal_name, MetaData(bind=self.engine), autoload=True, extend_existing=True)
         else:
-            return Table(dtable.internal_name, sqlalchemy.MetaData(bind=engine))
+            return Table(dtable.internal_name, MetaData(bind=self.engine))
 
     # need a function to return a dtable_data.py
     def get_data_handle(self, dtable_instance):

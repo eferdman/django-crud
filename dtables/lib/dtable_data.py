@@ -1,5 +1,3 @@
-# this is called a handle
-# call this class for
 class DTableData:
     def __init__(self, schema, data_engine):
         # The Dtable object
