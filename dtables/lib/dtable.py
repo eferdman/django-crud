@@ -1,11 +1,6 @@
-from collections import OrderedDict
-from dtables.views import *
-from sqlalchemy import inspect
 from .dtcolumn import DTColumn
-from ..helpers import *
 
 
-# represents a user generated table
 class DTable:
     def __init__(self, table_name, dt_columns=None, table_id=None, internal_name=None):
         self.table_id = table_id

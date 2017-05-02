@@ -16,6 +16,7 @@ metadata = sqlalchemy.MetaData(bind=engine)
 sqlstore = DTSchemaStoreSQL(session, metadata)
 datastore = DTDataEngineSQL(engine, session, metadata)
 
+
 def index(request):
     if request.method == 'POST':
         # user creates a new table

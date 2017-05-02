@@ -1,7 +1,3 @@
-import sqlalchemy.types as sa_types
-from dtables.views import *
-
-
 class DTColumn:
     def __init__(self, id, table_id, name, column_type, db_data_type):
         self.id = id
