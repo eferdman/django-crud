@@ -108,8 +108,23 @@
                 </table>
             </div>
 
+            <div id="table">
+                <p v-text="message"></p>
+                <ul v-for="item in users">
+                    <li>
+                        Name: <span v-text="item.name"></span>
+                        Id: <span v-text="item.id"></span>
+                    </li>
+                </ul>
+                <input value="nope" placeholder="Hi There" type="text" style="border: none; background-color: transparent; outline: transparent;">
+            </div>
+
 
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="../../../../static/dtables/js/vue-index.js"></script>
 {% endblock %}

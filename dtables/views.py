@@ -5,6 +5,8 @@ from sqlalchemy.orm import sessionmaker
 from .lib.dt_schema_store_sql import DTSchemaStoreSQL
 from .lib.dtcolumn import DTColumn
 from .lib.dt_data_engine_sql import DTDataEngineSQL
+from django.http import JsonResponse
+import json
 import migrate.changeset
 
 engine = sqlalchemy.create_engine('postgresql+psycopg2://liz:welcometodyl@localhost:5432/dyldb')
@@ -53,6 +55,21 @@ def index(request):
     return render(request, 'dtables/index.html', context)
 
 
+def test(request):
+    users = session.query(Users).order_by(Users.id).all()
+    context = {'users': users}
+    json = {}
+    json['users'] = []
+    for user in users:
+        obj = {}
+        obj['id'] = user.id
+        obj['name'] = user.name
+        obj['table_name'] = user.table_name
+        json['users'].append(obj)
+    users = json
+    return JsonResponse(users)
+
+
 def edit_columns(request, table_id):
     if request.method == 'POST':
         if request.POST.get("add_column"):
@@ -75,7 +92,7 @@ def edit_columns(request, table_id):
             }
             name = request.POST.get('name', '')            # user defined name of column
             data_type = request.POST.get('data_type', '')  # user level data type
-            db_data_type = data_types[data_type]   # db level data type
+            db_data_type = data_types[data_type]           # db level data type
 
             # check if that column already exists before adding:
             if name not in column_names:
@@ -138,7 +155,8 @@ def edit_columns(request, table_id):
         }
     }
     context = {'table': table}
-    return render(request, 'dtables/edit-columns_interactions.html', context)
+    return render(request, 'dtables/edit-columns.html', context)
+
 
 
 def table_view(request, table_id):

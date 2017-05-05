@@ -1,6 +1,6 @@
 // csrf token methodology
 $(function() {
-console.log("Dtables ajax helper is loaded!");
+console.log("Insignia ajax helper is loaded!");
 
 
     // This function gets cookie with a given name
@@ -54,21 +54,23 @@ console.log("Dtables ajax helper is loaded!");
         }
     });
 
-    // $.ajax({
-    //     url: '/dtables/test/',
-    //     dataType: 'json',
-    //     success: function (data) {
-    //         console.log(data.users);
-    //         users = data.users;
-    //         users.forEach(function (user) {
-    //             console.log(user.id);
-    //         });
-    //     },
-    //     error: function(err) {
-    //         console.log("Error")
-    //         console.log(err);
-    //     }
-    // });
-
+    $("#post-form").submit(function() {
+        $.ajax({
+        url: '/insignia/ajax/validate/',
+        type: 'POST',
+        data: {
+          'username': 'elizabeth'
+        },
+        dataType: 'json',
+        success: function (data) {
+          if (data.is_taken) {
+            console.log("A user with this username already exists.");
+          }
+        },
+        error: function(err) {
+            console.log("Error");
+        }
+      });
+    });
 
 });
