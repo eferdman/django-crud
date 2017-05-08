@@ -10,3 +10,9 @@
 .navbar-fixed-top, .navbar-static-top {
 	background: #fff;
 }
+
+.borderless {
+	border: none;
+	background-color: transparent;
+/*	outline: transparent;
+*/}

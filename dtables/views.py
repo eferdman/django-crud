@@ -18,44 +18,45 @@ metadata = sqlalchemy.MetaData(bind=engine)
 sqlstore = DTSchemaStoreSQL(session, metadata)
 datastore = DTDataEngineSQL(engine, session, metadata)
 
-
 def index(request):
+    # TODO: replace with ajax requests
     if request.method == 'POST':
-        # user creates a new table
-        if request.POST.get('create_table'):
-            table_name = request.POST.get('table_name', '')
-
-            new_table = sqlstore.get_schema(table_name)
-            sqlstore.set_schema(new_table)
-            datastore.set_schema(new_table)
-        elif request.POST.get('delete_table'):
-            id = request.POST.get('id', '')
-
-            table = sqlstore.get_schema(table_name=None, table_id=id)
-            table.delete()
-            sqlstore.set_schema(table)
-            datastore.set_schema(table)
-        elif request.POST.get('update_row'):
-            if request.POST.get('updated_value'):
-                updated_name = request.POST.get('updated_value', '')
+        if request.POST.get('update_row'):
+            if request.POST.get('table-name'):
+                updated_name = request.POST.get('table-name', '')
                 id = request.POST.get('id', '')
 
                 table = sqlstore.get_schema(table_name=None, table_id=id)
                 table.update_name(updated_name)
                 sqlstore.set_schema(table)
-    else:
-        if request.GET.get("edit_columns"):
-            id = request.GET.get('id', '')
-            return HttpResponseRedirect('/dtables/columns/{}'.format(id))
-        elif request.GET.get("edit_data"):
-            id = request.GET.get('id', '')
-            return HttpResponseRedirect('/dtables/table/{}'.format(id))
-    users = session.query(Users).order_by(Users.id)
-    context = {'users': users}
-    return render(request, 'dtables/index.html', context)
+    return render(request, 'dtables/index.html')
 
 
-def test(request):
+def delete_table(request):
+    print(request.POST['id'])
+    id = int(request.POST['id'])
+
+    table = sqlstore.get_schema(table_name=None, table_id=id)
+    table.delete()
+    sqlstore.set_schema(table)
+    datastore.set_schema(table)
+    return JsonResponse({'id': id})
+
+
+def add_table(request):
+    table_name = request.POST['table_name']
+
+    new_table = sqlstore.get_schema(table_name)
+    sqlstore.set_schema(new_table)
+    datastore.set_schema(new_table)
+
+    data = {}
+    data['id'] = new_table.table_id
+    data['table_name'] = new_table.table_name
+    return JsonResponse(data)
+
+
+def get_tables(request):
     users = session.query(Users).order_by(Users.id).all()
     context = {'users': users}
     json = {}

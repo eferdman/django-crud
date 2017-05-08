@@ -4,19 +4,18 @@
 var table = new Vue({
     el: '#table',
     data: {
-        users: []
+        users: [],
+        collapsed: true
     },
     methods: {
         populateTable: function () {
             var self = this;
-            self.message = "blah";
             $.ajax({
-                url: '/dtables/test/',
+                url: '/dtables/get_tables/',
                 dataType: 'json',
                 success: function (data) {
                     users = data.users;
                     users.forEach(function (user) {
-                        console.log(user);
                         self.users.push({
                             'id': user.id,
                             'name': user.table_name
@@ -25,7 +24,48 @@ var table = new Vue({
 
                 },
                 error: function (err) {
-                    console.log("Error")
+                    console.log(err);
+                }
+            });
+        },
+        addTable: function(event) {
+            var self = this;
+            // use $(event.target) to grab the element
+            // that was clicked on
+            table_name = $("#table_name").val();
+            data = { 'table_name': table_name };
+            $.ajax({
+                url: '/dtables/add_table/',
+                dataType: 'json',
+                type: "POST",
+                data: data,
+                success: function(res) {
+                    console.log(res)
+                    self.users.push({
+                        'id': res.id, 
+                        'name': res.table_name
+                    })
+                },
+                error: function(err) {
+                    console.log(err);
+                }
+            })
+        },
+        deleteTable: function(event) {
+            var self = this;
+            id = $(event.target).siblings("input").val();
+            data = {'id': id}
+            $.ajax({
+                url: '/dtables/delete_table/',
+                dataType: 'json',
+                type: "POST",
+                data: data,
+                success: function(response) {
+                    var id = parseInt(id)
+                    var index = self.users.findIndex(x => x.id == id);
+                    self.users.splice(index);
+                },
+                error: function(err) {
                     console.log(err);
                 }
             });
@@ -34,9 +74,4 @@ var table = new Vue({
     beforeMount: function () {
         this.populateTable();
     }
-});
-
-Vue.component('mycomponent', {
-    props: ['user'],
-    template: '<li>{{ user.name }}</li>'
 });
