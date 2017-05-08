@@ -55,6 +55,22 @@ var table = new Vue({
                 }).fail( err => {
                     console.log(err);
                 });
+        },
+        updateTable: function(event) {
+            var self = this;
+            event.preventDefault();
+            id = $(event.target).closest("form").find("#id").val();
+            table_name = $(event.target).closest("form").find("#table-name").val();
+            data = {'id': id, 'table-name': table_name }
+            url = '/dtables/update_table/'
+            $.post(url, data)
+                .done( res => {
+                    id = parseInt(id);
+                    var index = self.users.findIndex(x => x.id == id);
+                    self.users[index]['name'] = res.name;
+                }).fail( err => {
+                    console.log(err);
+                })
         }
     },
     beforeMount: function () {

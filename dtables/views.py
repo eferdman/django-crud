@@ -18,18 +18,20 @@ metadata = sqlalchemy.MetaData(bind=engine)
 sqlstore = DTSchemaStoreSQL(session, metadata)
 datastore = DTDataEngineSQL(engine, session, metadata)
 
-def index(request):
-    # TODO: replace with ajax requests
-    if request.method == 'POST':
-        if request.POST.get('update_row'):
-            if request.POST.get('table-name'):
-                updated_name = request.POST.get('table-name', '')
-                id = request.POST.get('id', '')
 
-                table = sqlstore.get_schema(table_name=None, table_id=id)
-                table.update_name(updated_name)
-                sqlstore.set_schema(table)
+def index(request):
+    print("Django Rendering page")
     return render(request, 'dtables/index.html')
+
+
+def update_table(request):
+    updated_name = request.POST['table-name']
+    id = int(request.POST['id'])
+
+    table = sqlstore.get_schema(table_name=None, table_id=id)
+    table.update_name(updated_name)
+    sqlstore.set_schema(table)
+    return JsonResponse({'id': id, 'name': updated_name})
 
 
 def delete_table(request):

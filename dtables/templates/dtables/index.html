@@ -76,7 +76,7 @@
                                    <input class="borderless" name="table-name" id="table-name" v-model="table.name" />
                                    <div style="float: right;" >
                                        <input type="hidden" id="id" name="id" :value="table.id" />
-                                       <button name="update_row" value="update_row" type="submit" class="btn btn-xs btn-primary" style="margin-bottom: 0; margin-right: 10px;">
+                                       <button type="submit" @click="updateTable" name="update_row"  class="btn btn-xs btn-primary" style="margin-bottom: 0; margin-right: 10px;">
                                            <i class="fa fa-pencil-square-o"></i>
                                        </button>
                                        <button @click="deleteTable" name="delete_table" type="button" class="btn btn-xs btn-danger" style="margin: 0;">
@@ -86,12 +86,13 @@
                                </form>
                            </td>
                            <td>
-                            <div style="float: right">
-                                <a :href="'/dtables/columns/' + table.id" name="edit_columns"
-                                class="btn btn-xs btn-success" style="margin-bottom: 0;">Edit Columns</a>
-                                <a :href="'/dtables/table/' + table.id" name="edit_data"
-                                class="btn btn-xs btn-primary" style="margin-bottom: 0;">Edit Data</a>
-                            </td>
+                                <div style="float: right">
+                                    <a :href="'/dtables/columns/' + table.id" name="edit_columns"
+                                    class="btn btn-xs btn-success" style="margin-bottom: 0;">Edit Columns</a>
+                                    <a :href="'/dtables/table/' + table.id" name="edit_data"
+                                    class="btn btn-xs btn-primary" style="margin-bottom: 0;">Edit Data</a>
+                                </div>
+                           </td>
                         </tr>
                     </tbody>
                 </table>
