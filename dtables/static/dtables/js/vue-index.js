@@ -11,17 +11,17 @@ var table = new Vue({
         populateTable: function () {
             var self = this;
             url = '/dtables/get_tables/';
-            $.get(url, function(data) {
+            $.get(url, data => {
                 users = data.users;
-                users.forEach(function (user) {
+                users.forEach(user =>
                     self.users.push({
                         'id': user.id,
                         'name': user.table_name
                     })
-                });
-            }).fail(function(err) {
+                )
+            }).fail( err => {
                 console.log(err);
-            });
+            })
         },
         addTable: function(event) {
             var self = this;
@@ -31,14 +31,14 @@ var table = new Vue({
             data = { 'table_name': table_name };
 
             $.post(url, data)
-                .done(function( res ) {
+                .done( res => {
                     console.log(res)
                     self.users.push({
                         'id': res.id,
                         'name': res.table_name
                     });
                     console.log("tables: " + self.users)
-                }).fail(function( err ) {
+                }).fail( err => {
                     console.log(err);
                 });
         },
@@ -48,11 +48,11 @@ var table = new Vue({
             data = {'id': id}
             url = '/dtables/delete_table/'
             $.post(url, data)
-                .done( function( res ) {
+                .done( res => {
                     id = parseInt(id);
                     var index = self.users.findIndex(x => x.id == id);
                     self.users.splice(index, 1);
-                }).fail(function( err ) {
+                }).fail( err => {
                     console.log(err);
                 });
         }
