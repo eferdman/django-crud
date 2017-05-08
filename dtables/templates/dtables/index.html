@@ -91,12 +91,6 @@
                                 class="btn btn-xs btn-success" style="margin-bottom: 0;">Edit Columns</a>
                                 <a :href="'/dtables/table/' + table.id" name="edit_data"
                                 class="btn btn-xs btn-primary" style="margin-bottom: 0;">Edit Data</a>
-                                <form action="" style="display: inline;" method="POST" class="form-inline">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="id" :value="table.id"/>
-                                    <input type="submit" name="delete_table" value="X"
-                                    class="btn btn-xs btn-danger" style="margin-bottom: 0;"/>
-                                </form></div>
                             </td>
                         </tr>
                     </tbody>
