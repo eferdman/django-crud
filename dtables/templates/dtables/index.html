@@ -37,13 +37,14 @@
                             <tr>
                                 <td style="vertical-align: middle;"><label
                                     class="col-lg-2 control-label">Table</label></td>
-                                    <td><input type="text" placeholder="Name" id="table_name" name="table_name" class="form-control">
+                                    <td>
+                                        <input type="text" placeholder="Name" id="table_name" name="table_name" class="form-control">
                                     </td>
                                 </tr>
                                 <tr>
                                     <td></td>
                                     <td class="form-inline">
-                                        <button type="button" @click="addTable" name="create_table"
+                                        <button type="submit" @click="addTable" name="create_table"
                                         class="btn btn-s btn-primary" style="margin-bottom: 0;">Create</button>
                                         <button @click="collapsed = !collapsed" type="button" id="cancel-btn" class="btn btn-s btn-default"
                                         style="margin-bottom: 0; margin-left: 10px">Cancel
@@ -74,7 +75,7 @@
                                    {% csrf_token %}
                                    <input class="borderless" name="table-name" id="table-name" v-model="table.name" />
                                    <div style="float: right;" >
-                                       <input type="hidden" name="id" :value="table.id" />
+                                       <input type="hidden" id="id" name="id" :value="table.id" />
                                        <button name="update_row" value="update_row" type="submit" class="btn btn-xs btn-primary" style="margin-bottom: 0; margin-right: 10px;">
                                            <i class="fa fa-pencil-square-o"></i>
                                        </button>

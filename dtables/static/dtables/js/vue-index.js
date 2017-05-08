@@ -30,45 +30,36 @@ var table = new Vue({
         },
         addTable: function(event) {
             var self = this;
-            // use $(event.target) to grab the element
-            // that was clicked on
+            event.preventDefault();
+            url = '/dtables/add_table/';
             table_name = $("#table_name").val();
             data = { 'table_name': table_name };
-            $.ajax({
-                url: '/dtables/add_table/',
-                dataType: 'json',
-                type: "POST",
-                data: data,
-                success: function(res) {
+
+            $.post(url, data)
+                .done(function( res ) {
                     console.log(res)
                     self.users.push({
-                        'id': res.id, 
+                        'id': res.id,
                         'name': res.table_name
-                    })
-                },
-                error: function(err) {
+                    });
+                    console.log("tables: " + self.users)
+                }).fail(function( err ) {
                     console.log(err);
-                }
-            })
+                });
         },
         deleteTable: function(event) {
             var self = this;
-            id = $(event.target).siblings("input").val();
+            id = $(event.target).closest("form").find("#id").val();
             data = {'id': id}
-            $.ajax({
-                url: '/dtables/delete_table/',
-                dataType: 'json',
-                type: "POST",
-                data: data,
-                success: function(response) {
-                    var id = parseInt(id)
+            url = '/dtables/delete_table/'
+            $.post(url, data)
+                .done( function( res ) {
+                    id = parseInt(id);
                     var index = self.users.findIndex(x => x.id == id);
-                    self.users.splice(index);
-                },
-                error: function(err) {
+                    self.users.splice(index, 1);
+                }).fail(function( err ) {
                     console.log(err);
-                }
-            });
+                });
         }
     },
     beforeMount: function () {
