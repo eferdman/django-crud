@@ -10,22 +10,17 @@ var table = new Vue({
     methods: {
         populateTable: function () {
             var self = this;
-            $.ajax({
-                url: '/dtables/get_tables/',
-                dataType: 'json',
-                success: function (data) {
-                    users = data.users;
-                    users.forEach(function (user) {
-                        self.users.push({
-                            'id': user.id,
-                            'name': user.table_name
-                        })
-                    });
-
-                },
-                error: function (err) {
-                    console.log(err);
-                }
+            url = '/dtables/get_tables/';
+            $.get(url, function(data) {
+                users = data.users;
+                users.forEach(function (user) {
+                    self.users.push({
+                        'id': user.id,
+                        'name': user.table_name
+                    })
+                });
+            }).fail(function(err) {
+                console.log(err);
             });
         },
         addTable: function(event) {
