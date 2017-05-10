@@ -19,6 +19,9 @@ sqlstore = DTSchemaStoreSQL(session, metadata)
 datastore = DTDataEngineSQL(engine, session, metadata)
 
 
+def test(request):
+    return render(request, 'dtables/vue-index.html')
+
 def index(request):
     print("Django Rendering page")
     return render(request, 'dtables/index.html')
@@ -28,7 +31,7 @@ def update_table(request):
     updated_name = request.POST['table-name']
     id = int(request.POST['id'])
 
-    table = sqlstore.get_schema(table_name=None, table_id=id)
+    table = sqlstore.get_schema(table_name=updated_name, table_id=id)
     table.update_name(updated_name)
     sqlstore.set_schema(table)
     return JsonResponse({'id': id, 'name': updated_name})
@@ -59,18 +62,29 @@ def add_table(request):
 
 
 def get_tables(request):
-    users = session.query(Users).order_by(Users.id).all()
-    context = {'users': users}
+    tables = session.query(Users).order_by(Users.id).all()
+    context = {'tables': tables}
     json = {}
-    json['users'] = []
-    for user in users:
+    json['tables'] = []
+    for table in tables:
         obj = {}
-        obj['id'] = user.id
-        obj['name'] = user.name
-        obj['table_name'] = user.table_name
-        json['users'].append(obj)
-    users = json
-    return JsonResponse(users)
+        obj['id'] = table.id
+        obj['table_name'] = table.table_name
+        sql_columns = session.query(Columns). \
+            filter_by(table_id=table.id). \
+            order_by(Columns.sequence). \
+            all()
+        obj['columns'] = []
+        for column in sql_columns:
+            obj['columns'].append({
+                'id': column.id,
+                'name': column.name,
+                'type': column.type,
+                'sequence': column.sequence
+            })
+        json['tables'].append(obj)
+
+    return JsonResponse(json)
 
 
 def edit_columns(request, table_id):
@@ -159,7 +173,6 @@ def edit_columns(request, table_id):
     }
     context = {'table': table}
     return render(request, 'dtables/edit-columns.html', context)
-
 
 
 def table_view(request, table_id):

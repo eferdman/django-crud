@@ -4,7 +4,8 @@
 var table = new Vue({
     el: '#table',
     data: {
-        users: [],
+        tables: [],
+        currentTable: '',
         collapsed: true
     },
     methods: {
@@ -12,16 +13,21 @@ var table = new Vue({
             var self = this;
             url = '/dtables/get_tables/';
             $.get(url, data => {
-                users = data.users;
-                users.forEach(user =>
-                    self.users.push({
-                        'id': user.id,
-                        'name': user.table_name
+                tables = data.tables;
+                tables.forEach(table =>
+                    self.tables.push({
+                        'id': table.id,
+                        'name': table.table_name,
+                        'columns' : table.columns
                     })
                 )
             }).fail( err => {
                 console.log(err);
             })
+        },
+        selectTable: function(table, event) {
+            var self = this;
+            self.currentTable = table
         },
         addTable: function(event) {
             var self = this;
@@ -33,11 +39,11 @@ var table = new Vue({
             $.post(url, data)
                 .done( res => {
                     console.log(res)
-                    self.users.push({
+                    self.tables.push({
                         'id': res.id,
                         'name': res.table_name
                     });
-                    console.log("tables: " + self.users)
+                    console.log("tables: " + self.tables)
                 }).fail( err => {
                     console.log(err);
                 });
@@ -50,8 +56,8 @@ var table = new Vue({
             $.post(url, data)
                 .done( res => {
                     id = parseInt(id);
-                    var index = self.users.findIndex(x => x.id == id);
-                    self.users.splice(index, 1);
+                    var index = self.tables.findIndex(x => x.id == id);
+                    self.tables.splice(index, 1);
                 }).fail( err => {
                     console.log(err);
                 });
@@ -66,8 +72,8 @@ var table = new Vue({
             $.post(url, data)
                 .done( res => {
                     id = parseInt(id);
-                    var index = self.users.findIndex(x => x.id == id);
-                    self.users[index]['name'] = res.name;
+                    var index = self.tables.findIndex(x => x.id == id);
+                    self.tables[index]['name'] = res.name;
                 }).fail( err => {
                     console.log(err);
                 })
@@ -76,4 +82,6 @@ var table = new Vue({
     beforeMount: function () {
         this.populateTable();
     }
+
 });
+
