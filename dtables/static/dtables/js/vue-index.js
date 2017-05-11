@@ -1,25 +1,29 @@
 /**
  * Created by dyl on 5/4/17.
  */
+
+var Table = function(data) {
+    this.id = data.id
+    this.name = data.table_name
+    this.columns = data.columns
+}
+
 var table = new Vue({
     el: '#table',
     data: {
         tables: [],
         currentTable: '',
-        collapsed: true
+        collapsed: true,
+        table_view: false
     },
     methods: {
+        test: function() {console.log("hi");},
         populateTable: function () {
             var self = this;
             url = '/dtables/get_tables/';
             $.get(url, data => {
-                tables = data.tables;
-                tables.forEach(table =>
-                    self.tables.push({
-                        'id': table.id,
-                        'name': table.table_name,
-                        'columns' : table.columns
-                    })
+                data.tables.forEach(table =>
+                    self.tables.push(new Table(table))
                 )
             }).fail( err => {
                 console.log(err);
@@ -27,7 +31,8 @@ var table = new Vue({
         },
         selectTable: function(table, event) {
             var self = this;
-            self.currentTable = table
+            self.currentTable = table;
+            self.table_view = true;
         },
         addTable: function(event) {
             var self = this;

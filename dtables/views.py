@@ -22,6 +22,7 @@ datastore = DTDataEngineSQL(engine, session, metadata)
 def test(request):
     return render(request, 'dtables/vue-index.html')
 
+
 def index(request):
     print("Django Rendering page")
     return render(request, 'dtables/index.html')

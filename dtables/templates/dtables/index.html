@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<div id="table" class="wrapper wrapper-content" >
+<div id="table" class="wrapper wrapper-content">
 
     <div class="col-lg-12">
         <div class="ibox float-e-margins">
@@ -11,95 +11,119 @@
     </div>
     <div class="col-lg-12">
 
-        <div class="ibox float-e-margins">
+        <div v-show="!table_view" class="ibox float-e-margins">
             <div class="ibox-title">
-                <h5>Table List</h5> 
+                <h5>Table List</h5>
             </div>
             <div class="ibox-content">
                 <form role="form" class="form-inline">
-                    <button @click="collapsed = !collapsed" type="button" id="create_button" class="btn btn-w-m btn-success"
-                    style="margin-bottom: 0;">Add Table
-                </button>
-            </form>
-        </div>
+                    <button @click="collapsed = !collapsed" type="button" id="create_button"
+                            class="btn btn-w-m btn-success"
+                            style="margin-bottom: 0;">Add Table
+                    </button>
+                </form>
+            </div>
 
-        <div :class="{ 'hidden' : collapsed }" id="popout_form" class="ibox-content col-lg-12">
-            <div class="well col-lg-3">
-                <form action="" method="post" role="form" class="form-inline">
-                    {% csrf_token %}
-                    <table class="table" style="">
-                        <thead>
+            <div :class="{ 'hidden' : collapsed }" id="popout_form" class="ibox-content col-lg-12">
+                <div class="well col-lg-3">
+                    <form action="" method="post" role="form" class="form-inline">
+                        {% csrf_token %}
+                        <table class="table" style="">
+                            <thead>
                             <tr>
                                 <th colspan="3" style="text-align: center;"><h3>New Table</h3></th>
                             </tr>
-                        </thead>
-                        <tbody>
+                            </thead>
+                            <tbody>
                             <tr>
                                 <td style="vertical-align: middle;"><label
-                                    class="col-lg-2 control-label">Table</label></td>
-                                    <td>
-                                        <input type="text" placeholder="Name" id="table_name" name="table_name" class="form-control">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td></td>
-                                    <td class="form-inline">
-                                        <button type="submit" @click="addTable" name="create_table"
-                                        class="btn btn-s btn-primary" style="margin-bottom: 0;">Create</button>
-                                        <button @click="collapsed = !collapsed" type="button" id="cancel-btn" class="btn btn-s btn-default"
-                                        style="margin-bottom: 0; margin-left: 10px">Cancel
+                                        class="col-lg-2 control-label">Table</label></td>
+                                <td>
+                                    <input type="text" placeholder="Name" id="table_name" name="table_name"
+                                           class="form-control">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td class="form-inline">
+                                    <button type="submit" @click="addTable" name="create_table"
+                                            class="btn btn-s btn-primary" style="margin-bottom: 0;">Create
+                                    </button>
+                                    <button @click="collapsed = !collapsed" type="button" id="cancel-btn"
+                                            class="btn btn-s btn-default"
+                                            style="margin-bottom: 0; margin-left: 10px">Cancel
                                     </button>
                                 </td>
                             </tr>
-                        </tbody>
-                    </table>
-                </form>
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
             </div>
-        </div>
-        <div class="ibox-content">
-            <div class="table-responsive">
-                <table class="table table-striped table-bordered table-hover dataTables-example">
-                    <thead>
+            <div class="ibox-content">
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered table-hover dataTables-example">
+                        <thead>
                         <tr>
                             <th>ID</th>
                             <th>Table Name</th>
-                            <th>Commands</th>
+                            <th>Actions</th>
                         </tr>
-                    </thead>
-                    <tbody>
+                        </thead>
+                        <tbody>
 
                         <tr class="gradeC" v-for="table in tables">
                             <td v-text="table.id"></td>
                             <td width="40%" data-editable>
-                               <form method="post">
-                                   {% csrf_token %}
-                                   <input class="borderless" name="table-name" id="table-name" v-model="table.name" />
-                                   <div style="float: right;" >
-                                       <input type="hidden" id="id" name="id" :value="table.id" />
-                                       <button type="submit" @click="updateTable" name="update_row"  class="btn btn-xs btn-primary" style="margin-bottom: 0; margin-right: 10px;">
-                                           <i class="fa fa-pencil-square-o"></i>
-                                       </button>
-                                       <button @click="deleteTable" name="delete_table" type="button" class="btn btn-xs btn-danger" style="margin: 0;">
-                                           <i class="fa fa-trash"></i>
-                                       </button>
-                                   </div>
-                               </form>
-                           </td>
-                           <td>
+                                <form method="post" style="margin-bottom: 0px">
+                                    {% csrf_token %}
+                                    <input class="borderless" name="table-name" id="table-name" v-model="table.name"/>
+                                    <div style="float: right;">
+                                        <input type="hidden" id="id" name="id" :value="table.id"/>
+                                        <button type="submit" @click="updateTable" name="update_row"
+                                                class="btn btn-xs btn-primary"
+                                                style="margin-bottom: 0; margin-right: 10px;">
+                                            <i class="fa fa-pencil-square-o"></i>
+                                        </button>
+                                        <button @click="deleteTable" name="delete_table" type="button"
+                                                class="btn btn-xs btn-danger" style="margin: 0;">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </form>
+                            </td>
+                            <td>
                                 <div style="float: right">
+                                    <button @click="selectTable(table, $event)" type="button"
+                                            class="btn btn-xs btn-info" style="margin-bottom: 0;">
+                                        <i class="fa fa-table"></i> Table View
+                                    </button>
                                     <a :href="'/dtables/columns/' + table.id" name="edit_columns"
-                                    class="btn btn-xs btn-success" style="margin-bottom: 0;">Edit Columns</a>
+                                       class="btn btn-xs btn-success" style="margin-bottom: 0;">Edit Columns</a>
                                     <a :href="'/dtables/table/' + table.id" name="edit_data"
-                                    class="btn btn-xs btn-primary" style="margin-bottom: 0;">Edit Data</a>
+                                       class="btn btn-xs btn-primary" style="margin-bottom: 0;">Edit Data</a>
                                 </div>
-                           </td>
+                            </td>
                         </tr>
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
-</div>
+    <template v-if="currentTable">
+        <input class="borderless" v-model="currentTable.name" @keyup.enter="test">
+
+        <table class="table table-striped table-bordered table-hover dataTables-example">
+            <thead>
+            <tr>
+                <th v-for="column in currentTable.columns">
+                    <input v-model="column.name" type="text" class="form-control" >
+                </th>
+            </tr>
+            </thead>
+        </table>
+    </template>
 </div>
 {% endblock %}
 
