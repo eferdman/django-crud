@@ -2,10 +2,16 @@
  * Created by dyl on 5/4/17.
  */
 
-var Table = function(data) {
-    this.id = data.id
-    this.name = data.table_name
-    this.columns = data.columns
+var Table = function(id, name, columns, rows) {
+    this.id = id
+    this.name = name
+    this.columns = columns
+    this.rows = rows
+}
+
+var Row = function(id, values) {
+    this.id = id
+    this.values = values
 }
 
 var table = new Vue({
@@ -21,10 +27,17 @@ var table = new Vue({
         populateTable: function () {
             var self = this;
             url = '/dtables/get_tables/';
+
             $.get(url, data => {
-                data.tables.forEach(table =>
-                    self.tables.push(new Table(table))
-                )
+                data.tables.forEach(table => {
+                    rows = [];
+                    table.rows.forEach(function(row) {
+                        row_id = row['id']
+                        delete row['id']
+                        rows.push(new Row(row_id, row))
+                    });
+                    self.tables.push(new Table(table.id, table.table_name, table.columns, rows));
+                })
             }).fail( err => {
                 console.log(err);
             })

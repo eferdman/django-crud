@@ -117,14 +117,22 @@
         <table class="table table-striped table-bordered table-hover dataTables-example">
             <thead>
             <tr>
+                <th>Id</th>
                 <th v-for="column in currentTable.columns">
                     <input v-model="column.name" type="text" class="form-control" >
                 </th>
             </tr>
             </thead>
+            <tbody>
+                <tr v-for="row in currentTable.rows.values">
+                    <td v-for="value in row" v-text="value"></td>
+                </tr>
+            </tbody>
         </table>
+        <p v-text="currentTable.rows"></p>
     </template>
 </div>
+
 {% endblock %}
 
 {% block scripts %}

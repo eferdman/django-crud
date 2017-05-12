@@ -64,13 +64,16 @@ def add_table(request):
 
 def get_tables(request):
     tables = session.query(Users).order_by(Users.id).all()
-    context = {'tables': tables}
-    json = {}
-    json['tables'] = []
+    data = {
+        'tables': []
+    }
     for table in tables:
-        obj = {}
-        obj['id'] = table.id
-        obj['table_name'] = table.table_name
+        obj = {
+            'id': table.id,
+            'table_name': table.table_name,
+            'columns': [],
+            'rows': []
+        }
         sql_columns = session.query(Columns). \
             filter_by(table_id=table.id). \
             order_by(Columns.sequence). \
@@ -83,9 +86,19 @@ def get_tables(request):
                 'type': column.type,
                 'sequence': column.sequence
             })
-        json['tables'].append(obj)
 
-    return JsonResponse(json)
+        table_name = 'table_{}'.format(table.id)
+        dtable = sqlstore.get_schema(table_name, table.id)
+        handle = datastore.get_data_handle(dtable)
+        sql_rows = handle.list_rows()
+        for row in sql_rows:
+            row_as_dict = dict(zip(row.keys(), row))
+            print(row_as_dict)
+            obj['rows'].append(row_as_dict)
+        data['tables'].append(obj)
+    print(data['tables'])
+
+    return JsonResponse(data)
 
 
 def edit_columns(request, table_id):
