@@ -12,6 +12,10 @@ var Table = function(id, name, columns, rows) {
 var Row = function(id, values) {
     this.id = id
     this.values = values
+    this.new_row_values = []
+    for (i in this.values) {
+        this.new_row_values.push("");
+    }
 }
 
 var table = new Vue({
@@ -23,7 +27,15 @@ var table = new Vue({
         table_view: false
     },
     methods: {
-        test: function() {console.log("hi");},
+        test: function(object, event) {
+            console.log(object);
+        },
+        testAdd: function(event) {
+            var self = this;
+            $( "td > #entry" ).each(function() {
+                console.log( $( this ).val(), $(this).attr("name") );
+            });
+        },
         populateTable: function () {
             var self = this;
             url = '/dtables/get_tables/';
